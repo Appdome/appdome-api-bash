@@ -160,7 +160,7 @@ parse_args() {
       shift 2
       ;;
     -gp | --google_play_signing)
-      GOOGLE_PLAY_SIGNING="$2"
+      GOOGLE_PLAY_SIGNING=true
       shift 1
       ;;
     -kp | --keystore_pass)
