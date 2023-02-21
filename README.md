@@ -9,8 +9,9 @@ All APIs are documented in https://apis.appdome.com/docs.
 - curl
 - jq
 
-**Note:** You can install the requirements with `apt-get install curl jq`.
+**Note:** For Linux (Debian based) You can install the requirements with `apt-get install curl jq`.
 
+**Note:** For MAC You can install the requirements with `brew install curl jq`.
 ## Basic Flow Usage
 **Note:** Passing overrides for any action is by using json file for example build_overrides.json
 
