@@ -5,6 +5,8 @@ source ./utils.sh
 AUTO_DEV_SIGN_ACTION='sign_script'
 
 auto_sign_ios() {
+  local operation="Sign app"
+  
   echo "Starting iOS Auto-DEV Private Signing"
   start_sign_time=$(date +%s)
 
@@ -17,18 +19,21 @@ auto_sign_ios() {
                   --form parent_task_id='$TASK_ID' \
                   $provisioning_profiles_entitlements \
                   --form overrides='$(echo "$SIGN_OVERRIDES")'"
-  eval $request
-  statusWaiter
+  SIGN="$(eval $request)"
+  validate_response_for_errors "$SIGN" $operation
+  statusWaiter "$operation"
   printTime $((($(date +%s) - start_sign_time))) "Sign took: "
   echo ""
 }
 
 auto_sign_android() {
+  local operation="Sign app"
+
   echo "Starting Android Auto-DEV Private Signing"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
   else
-    SIGN_OVERRIDES=$(echo $SIGN_OVERRIDES | jq '.signing_sha1_fingerprint |= "'"$SIGNING_FINGERPRINT"'"')
+    add_sign_overrides "signing_sha1_fingerprint" "$SIGNING_FINGERPRINT"
   fi
   start_sign_time=$(date +%s)
 
@@ -40,8 +45,9 @@ auto_sign_android() {
                   --form parent_task_id='$TASK_ID' \
                   --form overrides='$(echo "$SIGN_OVERRIDES")'"
 
-  eval $request
-  statusWaiter
+  SIGN="$(eval $request)"
+  validate_response_for_errors "$SIGN" $operation
+  statusWaiter "$operation"
   printTime $((($(date +%s) - start_sign_time))) "Sign took: "
   echo ""
 }

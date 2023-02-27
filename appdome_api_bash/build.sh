@@ -1,7 +1,9 @@
 #!/bin/bash
 source ./appdome_api_bash/status.sh
+source ./utils.sh
 
 build() {
+  local operation="Build app"
   echo "Starting build"
   start_build_time=$(date +%s)
   if [[ -z "$APP" ]]; then
@@ -15,12 +17,13 @@ build() {
                   $headers \
                   --form action=fuse \
                   --form fusion_set_id='$FUSION_SET_ID' \
-                  --form app_id='$(echo "$APP" | jq -r .id)' \
-                  --form overrides='$(echo "$SIGN_OVERRIDES")' |
-                  jq -r .task_id"
+                  --form app_id='$(extract_string_value_from_json "$APP" "id")' \
+                  --form overrides='$(echo "$SIGN_OVERRIDES")'"
   
   TASK_ID="$(eval $request)"
-  statusWaiter
+  validate_response_for_errors "$TASK_ID" $operation
+  TASK_ID=$(extract_string_value_from_json $TASK_ID "task_id")
+  statusWaiter $operation
   printTime $((($(date +%s) - start_build_time))) "Build took: "
   echo "Task-id: $TASK_ID"
   echo ""

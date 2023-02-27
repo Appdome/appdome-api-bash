@@ -1,7 +1,10 @@
 #!/bin/bash
 source ./appdome_api_bash/status.sh
+source ./utils.sh
 
 context() {
+  local operation="Context"
+  
   echo "Starting Context"
   start_context_time=$(date +%s)
 
@@ -12,8 +15,9 @@ context() {
                   --form action=context \
                   --form parent_task_id='$TASK_ID' \
                   --form overrides='$(echo "$CONTEXT_OVERRIDES")'"
-  eval $request
-  statusWaiter 
+  CONTEXT="$(eval $request)"
+  validate_response_for_errors "$CONTEXT" $operation
+  
   printTime $((($(date +%s) - start_context_time))) "Context took: "
   echo ""
 }

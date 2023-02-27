@@ -11,10 +11,9 @@ source ./appdome_api_bash/download.sh
 source ./appdome_api_bash/certified_secure.sh
 source ./appdome_api_bash/status.sh
 
-# This script uses curl and jq methods
 
-SERVER_URL='https://fusion.appdome.com'
-API_KEY=''
+SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
+API_KEY="${API_KEY_ENV:-}"
 TEAM_ID='personal'
 FUSION_SET_ID=''
 APP_LOCATION=''
@@ -39,8 +38,7 @@ main() {
 
   upload
   build
-  [[ "$STATUS" == "completed" ]] && context
-  [[ "$STATUS" == "completed" ]] && case "$SIGN_METHOD" in
+  case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
       private_sign_ios

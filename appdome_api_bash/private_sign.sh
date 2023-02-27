@@ -4,6 +4,8 @@ source ./utils.sh
 PRIVATE_SIGN_ACTION='seal'
 
 private_sign_ios() {
+  local operation="Sign app"
+
   echo "Starting iOS Private Signing"
   start_sign_time=$(date +%s)
 
@@ -16,19 +18,22 @@ private_sign_ios() {
                   --form parent_task_id='$TASK_ID' \
                   $provisioning_profiles_entitlements \
                   --form overrides='$(echo "$SIGN_OVERRIDES")'"
-  eval $request
-  statusWaiter
+  SIGN="$(eval $request)"
+  validate_response_for_errors "$SIGN" $operation
+  statusWaiter "$operation"
   echo "Sign took: "
   printTime $((($(date +%s) - start_sign_time)))
   echo ""
 }
 
 private_sign_android() {
+  local operation="Sign app"
+  
   echo "Starting Android Private Signing"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
   else
-    SIGN_OVERRIDES=$(echo $SIGN_OVERRIDES | jq '.signing_sha1_fingerprint |= "'"$SIGNING_FINGERPRINT"'"')
+    add_sign_overrides "signing_sha1_fingerprint" "$SIGNING_FINGERPRINT"
   fi
   start_sign_time=$(date +%s)
 
@@ -40,8 +45,9 @@ private_sign_android() {
                   --form parent_task_id='$TASK_ID' \
                   --form overrides='$(echo "$SIGN_OVERRIDES")'"
 
-  eval $request
-  statusWaiter
+  SIGN="$(eval $request)"
+  validate_response_for_errors "$SIGN" $operation
+  statusWaiter "$operation"
   printTime $((($(date +%s) - start_sign_time))) "Sign took: "
   echo ""
 }

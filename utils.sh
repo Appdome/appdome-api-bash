@@ -1,6 +1,6 @@
 add_google_play_signing_fingerprint() {
-  SIGN_OVERRIDES=$(echo $SIGN_OVERRIDES | jq '.signing_keystore_use_google_signing |= "true"')
-  SIGN_OVERRIDES=$(echo $SIGN_OVERRIDES | jq '.signing_keystore_google_signing_sha1_key |= "'"$SIGNING_FINGERPRINT"'"')
+  add_sign_overrides "signing_keystore_use_google_signing" "true"
+  add_sign_overrides "signing_keystore_google_signing_sha1_key" "$SIGNING_FINGERPRINT"
 }
 
 validate_args() {
@@ -11,6 +11,31 @@ validate_args() {
       exit 1
     fi
   done
+}
+
+validate_files() {
+  args=("$@")
+  for ((i = 1; i < $#; i++)); do
+    if [[ ! -f "${args[i]}" ]]; then
+      echo "$1 file: ${args[i]} does not exist."
+      exit 1
+    fi
+  done
+}
+
+validate_response_for_errors() {
+  if [[ "$1" == *"error"* ]]; then
+    echo "$2 failed. Error: $1"
+    exit 1
+  fi
+}
+
+validate_response_code() {
+  if [[ "$1" != "200" ]]; then
+    echo "$2 failed. Error: $(cat $3)"
+    rm $3
+    exit 1
+  fi
 }
 
 request_headers() {
@@ -54,4 +79,19 @@ printTime() {
   fi
   printf "$2$STR_HOURS:$STR_MINUTES:$STR_SECONDS"%s
   echo ""
+}
+
+extract_string_value_from_json() {
+  local cmd="echo "\$1" | grep -o '\"$2\"\s*:\s*\"[^\"]*' | grep -o '[^\"]*$'"
+  echo "$(eval $cmd)"
+}
+
+add_sign_overrides() {
+  if [[ $SIGN_OVERRIDES == "{}" ]]; then
+    SIGN_OVERRIDES="{\"$1\":\"$2\"}"
+  else
+    SIGN_OVERRIDES=${SIGN_OVERRIDES%?} # Remove last char '}'
+    SIGN_OVERRIDES="$(echo "${SIGN_OVERRIDES%%[[:space:]]}")" # Remove white spacing
+    SIGN_OVERRIDES="$SIGN_OVERRIDES, \"$1\":\"$2\"}" # Add new key value
+  fi
 }

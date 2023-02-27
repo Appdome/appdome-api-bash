@@ -35,23 +35,25 @@ validate_inputs() {
   case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_args "Provisioning profile" "$PROVISIONING_PROFILES"
+      validate_files "Provisioning profile" "$PROVISIONING_PROFILES"
     else
       validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
     fi
     ;;
   "$AUTO_DEV_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_args "Signing parameters" "$PROVISIONING_PROFILES" "$ENTITLEMENTS"
+      validate_files "Signing" "$PROVISIONING_PROFILES" "$ENTITLEMENTS"
     else
       validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
     fi
     ;;
   "$SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_args "Signing parameters" "$PROVISIONING_PROFILES" "$SIGNING_KEYSTORE" "$ENTITLEMENTS" "$KEYSTORE_PASS"
+      validate_args "Signing parameters" "$KEYSTORE_PASS"
+      validate_files "Signing" "$PROVISIONING_PROFILES" "$SIGNING_KEYSTORE" "$ENTITLEMENTS"
     else
-      validate_args "Signing parameters" "$SIGNING_KEYSTORE" "$KEYSTORE_PASS" "$KEYSTORE_ALIAS" "$KEYS_PASS"
+      validate_args "Signing parameters" "$KEYSTORE_PASS" "$KEYSTORE_ALIAS" "$KEYS_PASS"
+      validate_files "Signing" "$SIGNING_KEYSTORE"
     fi
     ;;
   esac
@@ -63,31 +65,30 @@ validate_inputs() {
 help() {
   # Display Help
   echo
-  echo "-key | --api_key                           Appdome API key"
-  echo "-f | --fusion_set_id                       Fusion-set-id to use"
-  echo "-t | --team_id                             Appdome team id"
-  echo "-l | --app                                 Application location"
-  echo "-o | --output                              Output file for fused and signed app after Appdome"
-  echo "-co | --certificate_output                 Output file for Certified Secure pdf"
-  echo "-bv | --build_overrides                    Path to json file with build overrides"
-  echo "-cv | --context_overrides                  Path to json file with context overrides"
-  echo "-sv | --sign_overrides                     Path to json file with sign overrides"
-  echo "-bv | --build_overrides                    Path to json file with build overrides"
+  echo "-key  |  --api_key                          Appdome API key (required)"
+  echo "-fs    |  --fusion_set_id                    Fusion-set-id to use (required)"
+  echo "-t    |  --team_id                          Appdome team id (optional)"
+  echo "-a    |  --app                              Application location (required)"
+  echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
+  echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
+  echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
+  echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
+  echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
   echo
-  echo "please use one of the following signing options"
-  echo "-s | --sign_on_appdome                     Sign on Appdome"
-  echo "-ps | --private_signing                    Sign application manually"
-  echo "-adps | --auto_dev_private_signing         Use a pre-generated signing script for automated local signing"
+  echo "please use one of the following signing options (one of the three is required)"
+  echo "-s    |  --sign_on_appdome                  Sign on Appdome"
+  echo "-ps   |  --private_signing                  Sign application manually"
+  echo "-adps |  --auto_dev_private_signing         Use a pre-generated signing script for automated local signing"
   echo
   echo "Signing attribute:"
-  echo "-k | --keystore                            Path to keystore file to use on Appdome iOS and Android signing"
-  echo "-pr | --provisioning_profiles              Path to iOS provisioning profiles files to use. Can be multiple profiles"
-  echo "-entt | --entitlements                     Path to iOS entitlements plist to use. Can be multiple entitlements files"
-  echo "-cf | --signing_fingerprint                SHA-1 or SHA-256 final Android signing certificate fingerprint"
-  echo "-gp | --google_play_signing                This Android application will be distributed via the Google Play App Signing program"
-  echo "-kp | --keystore_pass                      Password for keystore to use on Appdome iOS and Android signing"
-  echo "-ka | --keystore_alias                     Key alias to use on Appdome Android signing"
-  echo "-kyp | --key_pass                          Password for the key to use on Appdome Android signing"
+  echo "-k    |  --keystore                         Path to keystore file to use on Appdome iOS and Android signing"
+  echo "-pr   |  --provisioning_profiles            Path to iOS provisioning profiles files to use. Can be multiple profiles"
+  echo "-entt |  --entitlements                     Path to iOS entitlements plist to use. Can be multiple entitlements files"
+  echo "-cf   |  --signing_fingerprint              SHA-1 or SHA-256 final Android signing certificate fingerprint"
+  echo "-gp   |  --google_play_signing              This Android application will be distributed via the Google Play App Signing program"
+  echo "-kp   |  --keystore_pass                    Password for keystore to use on Appdome iOS and Android signing"
+  echo "-ka   |  --keystore_alias                   Key alias to use on Appdome Android signing"
+  echo "-kyp  |  --key_pass                         Password for both Android and iOS key to use on Appdome Android signing"
   echo
 }
 
@@ -102,11 +103,11 @@ parse_args() {
       TEAM_ID="$2"
       shift 2
       ;;
-    -f | --fusion_set_id)
+    -fs | --fusion_set_id)
       FUSION_SET_ID="$2"
       shift 2
       ;;
-    -l | --app)
+    -a | --app)
       APP_LOCATION="$2"
       APP_FILE_NAME="$(basename -- "$APP_LOCATION")"
       shift 2
