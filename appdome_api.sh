@@ -8,7 +8,6 @@ source ./appdome_api_bash/private_sign.sh
 source ./appdome_api_bash/sign.sh
 source ./appdome_api_bash/auto_dev_sign.sh
 source ./appdome_api_bash/download.sh
-source ./appdome_api_bash/certified_secure.sh
 source ./appdome_api_bash/status.sh
 
 
@@ -62,9 +61,13 @@ main() {
     ;;
   esac
 
-  download
+  download_fused_app
   if [[ -n "$CERTIFICATE_OUTPUT_LOCATION" ]]; then
     download_certified_secure
+  fi
+
+  if [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
+    download_deobfuscation_script
   fi
 
   printTime $((($(date +%s) - start_all_process_time))) "Appdome API took: "

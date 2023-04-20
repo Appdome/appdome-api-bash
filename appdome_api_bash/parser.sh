@@ -66,11 +66,12 @@ help() {
   # Display Help
   echo
   echo "-key  |  --api_key                          Appdome API key (required)"
-  echo "-fs    |  --fusion_set_id                    Fusion-set-id to use (required)"
+  echo "-fs   |  --fusion_set_id                    Fusion-set-id to use (required)"
   echo "-t    |  --team_id                          Appdome team id (optional)"
   echo "-a    |  --app                              Application location (required)"
   echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
+  echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
@@ -142,6 +143,10 @@ parse_args() {
       ;;
     -co | --certificate_output)
       CERTIFICATE_OUTPUT_LOCATION=$2
+      shift 2
+      ;;
+    -dso | --deobfuscation_script_output)
+      DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION=$2
       shift 2
       ;;
     -bv | --build_overrides)

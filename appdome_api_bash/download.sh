@@ -1,20 +1,36 @@
 #!/bin/bash
 source ./utils.sh
 
-download() {
+download_fused_app() {
   local operation="Download app"
-  
-  echo "Starting Download Secured App"
+  local url="--url '$SERVER_URL/api/v1/tasks/$TASK_ID/output?team_id=$TEAM_ID'"
+  download "$operation" "$url" "$FINAL_OUTPUT_LOCATION"
+}
+
+download_deobfuscation_script() {
+  local operation="Download deobfuscation script"
+  local url="--url '$SERVER_URL/api/v1/tasks/$TASK_ID/output?team_id=$TEAM_ID&action=deobfuscation_script'"
+  download "$operation" "$url" "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
+}
+
+download_certified_secure() {
+  local operation="Download Certified Secure"
+  local url="--url '$SERVER_URL/api/v1/tasks/$TASK_ID/certificate?team_id=$TEAM_ID'"
+  download "$operation" "$url" "$CERTIFICATE_OUTPUT_LOCATION"
+}
+
+download() {
+  echo "Starting $1"
   start_download_time=$(date +%s)
 
   local headers="$(request_headers)"
   local request="curl -s -w \"%{http_code}\" --location --request GET \
-                  --url '$SERVER_URL/api/v1/tasks/$TASK_ID/output?team_id=$TEAM_ID' \
+                  $2 \
                   $headers \
-                  -o '$FINAL_OUTPUT_LOCATION'"
+                  -o '$3'"
   DOWNLOAD="$(eval $request)"
-  validate_response_code "$DOWNLOAD" "$operation" $FINAL_OUTPUT_LOCATION
+  validate_response_code "$DOWNLOAD" "$1" $3
 
-  printTime $((($(date +%s) - start_download_time))) "Download took: " 
+  printTime $((($(date +%s) - start_download_time))) "$1 took: " 
   echo ""
 }

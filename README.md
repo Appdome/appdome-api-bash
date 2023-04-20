@@ -31,6 +31,7 @@ All APIs are documented in https://apis.appdome.com/docs.
 --key_pass <key password> \
 --output <output apk/aab> \
 --certificate_output <output certificate pdf> \
+--deobfuscation_script_output <output deobfuscation script zip>
 --build_overrides <json_file_path> \
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
