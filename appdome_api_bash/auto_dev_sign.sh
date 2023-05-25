@@ -9,6 +9,9 @@ auto_sign_ios() {
   
   echo "Starting iOS Auto-DEV Private Signing"
   start_sign_time=$(date +%s)
+  if [ ${#ENTITLEMENTS[@]} -gt 0 ]; then
+    add_sign_overrides "manual_entitlements_matching" "true"
+  fi
 
   local headers="$(request_headers)"
   local provisioning_profiles_entitlements=$(add_provisioning_profiles_entitlements)
