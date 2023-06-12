@@ -95,3 +95,13 @@ add_sign_overrides() {
     SIGN_OVERRIDES="$SIGN_OVERRIDES, \"$1\":\"$2\"}" # Add new key value
   fi
 }
+
+add_build_overrides() {
+  if [[ $BUILD_OVERRIDES == "{}" ]]; then
+    BUILD_OVERRIDES="{\"$1\":\"$2\"}"
+  else
+    BUILD_OVERRIDES=${BUILD_OVERRIDES%?} # Remove last char '}'
+    BUILD_OVERRIDES="$(echo "${BUILD_OVERRIDES%%[[:space:]]}")" # Remove white spacing
+    BUILD_OVERRIDES="$BUILD_OVERRIDES, \"$1\":\"$2\"}" # Add new key value
+  fi
+}

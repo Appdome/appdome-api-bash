@@ -73,6 +73,7 @@ help() {
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
   echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
+  echo "-bl   |  --build_logs                       Build with diagnostic logs (optional)"
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
   echo
@@ -152,6 +153,11 @@ parse_args() {
     -bv | --build_overrides)
       BUILD_OVERRIDES=$(cat "$2")
       shift 2
+      ;;
+    -bl | --build_logs)
+      BUILD_KEY="extended_logs"
+      BUILD_VALUE=true
+      shift 1
       ;;
     -cv | --context_overrides)
       CONTEXT_OVERRIDES=$(cat "$2")
