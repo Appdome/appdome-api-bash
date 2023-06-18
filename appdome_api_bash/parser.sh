@@ -10,7 +10,7 @@ validate_inputs() {
     PLATFORM=ANDROID
   else
     echo "No application provided. Exiting.."
-    exit 0
+    exit 1
   fi
 
   if [[ $PLATFORM == UNKNOWN ]]; then
@@ -20,7 +20,7 @@ validate_inputs() {
       PLATFORM=ANDROID
     else
       echo "Missing signing inputs. Exiting.."
-      exit 0
+      exit 1
     fi
   fi
 
