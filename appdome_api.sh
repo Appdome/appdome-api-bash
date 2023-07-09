@@ -23,6 +23,8 @@ PLATFORM=UNKNOWN
 BUILD_OVERRIDES="{}"
 CONTEXT_OVERRIDES="{}"
 SIGN_OVERRIDES="{}"
+
+
 if [[ -z "$APPDOME_CLIENT_HEADER" ]]; then
   APPDOME_CLIENT_HEADER='Appdome-cli-bash/1.0'
 else
@@ -34,6 +36,7 @@ main() {
   start_all_process_time=$(date +%s)
   echo "Starting Appdome flow"
   echo ""
+ 
 
   upload
   build
@@ -68,6 +71,10 @@ main() {
 
   if [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
     download_deobfuscation_script
+  fi
+
+  if [[ -n "$SECOND_OUTPUT_FILE" ]]; then
+    download_second_output
   fi
 
   printTime $((($(date +%s) - start_all_process_time))) "Appdome API took: "

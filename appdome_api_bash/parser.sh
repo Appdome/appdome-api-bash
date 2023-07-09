@@ -13,6 +13,17 @@ validate_inputs() {
     exit 1
   fi
 
+  if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
+    case $BUILD_TO_TEST in
+      AUTOMATION_BITBAR|AUTOMATION_BROWSERSTACK|AUTOMATION_LAMBDATEST|AUTOMATION_SAUCELABS)
+        ;;
+      *)
+        echo "Vendor name provided for Build To Test isn't one of the acceptable vendors: $BUILD_TO_TEST"
+        exit 1  # Exit the script with a non-zero status code
+        ;;
+    esac
+  fi
+
   if [[ $PLATFORM == UNKNOWN ]]; then
     if [[ -n "$PROVISIONING_PROFILES" && -z "$SIGNING_FINGERPRINT" && -z "$KEYSTORE_ALIAS" ]]; then
       PLATFORM=IOS
@@ -70,12 +81,14 @@ help() {
   echo "-t    |  --team_id                          Appdome team id (optional)"
   echo "-a    |  --app                              Application location (required)"
   echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
+  echo "-so   |  --second_output                     Second_output_app_file (optional)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
   echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
   echo "-bl   |  --build_logs                       Build with diagnostic logs (optional)"
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
+  echo "-btv  |  --build_to_test_vendor             Enter vendor name on which Build to Test will happen (optional)"
   echo
   echo "please use one of the following signing options (one of the three is required)"
   echo "-s    |  --sign_on_appdome                  Sign on Appdome"
@@ -158,6 +171,14 @@ parse_args() {
       BUILD_KEY="extended_logs"
       BUILD_VALUE=true
       shift 1
+      ;;
+    -so | --second_output)
+      SECOND_OUTPUT_FILE="$2"
+      shift 2
+      ;;
+    -btv | --build_to_test_vendor)
+      BUILD_TO_TEST="AUTOMATION_$(echo "$2" | tr '[:lower:]' '[:upper:]')"  # Convert to uppercase and add as prefix
+      shift 2
       ;;
     -cv | --context_overrides)
       CONTEXT_OVERRIDES=$(cat "$2")
