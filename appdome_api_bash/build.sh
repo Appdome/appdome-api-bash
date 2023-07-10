@@ -11,12 +11,20 @@ build() {
     exit 1
   fi
 
+  URL="$SERVER_URL/api/v1/tasks?team_id=$TEAM_ID"
+
   if [[ -n $BUILD_KEY ]]; then	
   	add_build_overrides $BUILD_KEY $BUILD_VALUE
   fi
+
+if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
+    add_build_overrides "build_to_test_vendor" "$BUILD_TO_TEST"
+    URL="$SERVER_URL/api/v1/build-to-test?team_id=$TEAM_ID"
+    local operation="Build app to test"
+  fi
   local headers="$(request_headers)"
   local request="curl -s --request POST \
-                  --url '$SERVER_URL/api/v1/tasks?team_id=$TEAM_ID' \
+                  --url "$URL" \
                   $headers \
                   --form action=fuse \
                   --form fusion_set_id='$FUSION_SET_ID' \
