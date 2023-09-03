@@ -19,15 +19,18 @@ download_deobfuscation_script() {
                   -o '$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION'"
   DOWNLOAD="$(eval $request)"
   
-  # Check the HTTP response code and file content for a specific condition
-  if [[ "$DOWNLOAD" == "404" && "$(cat $DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION)" == *"output is not found. Perhaps no controls requiring deobfuscation mapping files were selected"* ]]; then
-    # If the condition is met, remove the file and exit
-    rm "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
-  else
-    # If the condition is not met, print the start message and time measurement
-    echo "Starting $operation"
-    printTime $((($(date +%s) - start_download_time))) "$operation took: "
-    echo ""
+  # Check if the file exists before attempting to read it
+  if [ -f "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]; then
+    # Check the HTTP response code and file content for a specific condition
+    if [[ "$DOWNLOAD" == "404" && "$(cat "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION")" == *"output is not found. Perhaps no controls requiring deobfuscation mapping files were selected"* ]]; then
+      # If the condition is met, remove the file and exit
+      rm "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
+    else
+      # If the condition is not met, print the start message and time measurement
+      echo "Starting $operation"
+      printTime $((($(date +%s) - start_download_time))) "$operation took: "
+      echo ""
+    fi
   fi
 }
 
