@@ -20,7 +20,7 @@ download_deobfuscation_script() {
   DOWNLOAD="$(eval $request)"
   
     if [[ "$DOWNLOAD" == "404" ]]; then
-      rm "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
+      rm -f "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
     else
       echo "Starting $operation"
       printTime $((($(date +%s) - start_download_time))) "$operation took: "
