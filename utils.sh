@@ -32,14 +32,9 @@ validate_response_for_errors() {
 
 validate_response_code() {
   if [[ "$1" != "200" ]]; then
-    if [[ "$1" == "404" && "$(cat $3)" == *"output is not found. Perhaps no controls requiring deobfuscation mapping files were selected"* ]]; then
-      echo "Warning: Deobfuscation mapping not found."
-      rm $3
-    else
-      echo "Error: $2"
-      rm $3
-      exit 1
-    fi
+    echo "$2 failed. Error: $(cat $3)"
+    rm $3
+    exit 1
   fi
 }
 
