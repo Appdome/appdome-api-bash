@@ -9,8 +9,24 @@ download_fused_app() {
 
 download_deobfuscation_script() {
   local operation="Download deobfuscation script"
-  local url="--url '$SERVER_URL/api/v1/tasks/$TASK_ID/output?team_id=$TEAM_ID&action=deobfuscation_script'"
-  download "$operation" "$url" "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
+  local url="$SERVER_URL/api/v1/tasks/$TASK_ID/output?team_id=$TEAM_ID&action=deobfuscation_script"
+    
+  start_download_time=$(date +%s)
+  local headers="$(request_headers)"
+  local request="curl -s -w \"%{http_code}\" --location --request GET \
+                  '$url' \
+                  $headers \
+                  -o '$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION'"
+  DOWNLOAD="$(eval $request)"
+  
+  if [[ "$DOWNLOAD" == "404" ]]; then
+    rm -f "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
+  else
+    validate_response_code "$DOWNLOAD" "$operation" $DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION
+    echo "Starting $operation"
+    printTime $((($(date +%s) - start_download_time))) "$operation took: "
+    echo ""
+  fi
 }
 
 download_certified_secure() {
