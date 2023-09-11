@@ -209,8 +209,8 @@ main() {
     echo "Starting Appdome Validation flow"
     echo "" 
     # Call validation_upload and store the app_id
-    # validation_upload
-    validation_status "9002ae60-5073-11ee-993c-0fdfe8f3c127"
+    validation_upload
+    # validation_status "9002ae60-5073-11ee-993c-0fdfe8f3c127"
     printTime $((($(date +%s) - start_all_process_time))) "Appdome Validate app took: "
     
 }
