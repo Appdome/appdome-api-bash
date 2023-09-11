@@ -117,8 +117,8 @@ statusWaiter() {
   do
     STATUS_RESPONSE="$(eval $request)"
     STATUS=$(extract_string_value_from_validate_json $STATUS_RESPONSE "validation_state")
-    sleep 5
     printf '.'
+    sleep 10
   done
   echo
   STATUS=$(extract_string_value_from_validate_json "$STATUS_RESPONSE" "validation_state")
