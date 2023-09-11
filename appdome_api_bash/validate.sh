@@ -115,7 +115,6 @@ statusWaiter() {
                     $headers"
   while [ "$(echo "$STATUS_RESPONSE" | grep -c '"validation_state":"active"')" -gt 0 ]
   do
-    echo 
     STATUS_RESPONSE="$(eval "$request")"
     printf '.'
     sleep 1
