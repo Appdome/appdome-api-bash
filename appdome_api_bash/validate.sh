@@ -107,17 +107,16 @@ extract_string_value_from_validate_json() {
 }
 
 statusWaiter() {
-  STATUS="active"
+  STATUS_RESPONSE='"validation_state":"active"'
   local URL="$1"
   local headers="$2"
   local request="curl -s --request GET \
                     --url $URL \
                     $headers"
-  while [ X"$STATUS" = X"active" ]
+  while [ "$(echo "$STATUS_RESPONSE" | grep -c '"validation_state":"active"')" -gt 0 ]
   do
-    STATUS_RESPONSE="$(eval $request)"
-    STATUS=$(extract_string_value_from_validate_json $STATUS_RESPONSE "validation_state")
-    echo $STATUS_RESPONSE
+    echo 
+    STATUS_RESPONSE="$(eval "$request")"
     printf '.'
     sleep 5
   done
@@ -137,32 +136,6 @@ statusWaiter() {
     print_json "$STATUS_RESPONSE"
   fi
 }
-
-
-# print_json() {
-#     json="$1"
-
-#     # Extract the validation_state field
-#     validation_state=$(echo "$json" | grep -o '"validation_state":"[^"]*' | cut -d':' -f2 | tr -d '"')
-#     echo
-#     echo "Appdome Validation Results:"
-#     echo  "--------------------------"
-#     # Print the validation_state field
-#     echo "validation_state:$validation_state,"
-
-#     # Extract and format the messages
-#     messages=$(echo "$json" | grep -o '"message":"[^"]*' | cut -d':' -f2 | tr -d '"' | sed 's/,/,/g; s/,/,\n/g')
-    
-#     # Join lines that belong to the date
-#     formatted_messages=$(echo "$messages" | awk 'BEGIN{ORS=""; RS="01\n"} {gsub(/\n/, " ")} 1')
-    
-#     # Print the formatted messages
-#     echo "$formatted_messages"
-
-#     # Extract and print the other fields
-#     other_fields=$(echo "$json" | grep -o '"error":"[^"]*\|"build_id":"[^"]*\|"app_type":"[^"]*\|"app_name":"[^"]*\|"app_pack_id":"[^"]*\|"app_version":"[^"]*\|"app_build_number":"[^"]*\|"app_id":"[^"]*' | tr -d '"')
-#     echo "$other_fields"
-# }
 
 print_json() {
     json="$1"
@@ -210,8 +183,8 @@ main() {
     echo "Starting Appdome Validation flow"
     echo "" 
     # Call validation_upload and store the app_id
-    validation_upload
-    # validation_status "9002ae60-5073-11ee-993c-0fdfe8f3c127"
+    # validation_upload
+    validation_status "05a6d380-50a1-11ee-993c-0fdfe8f3c127"
     printTime $((($(date +%s) - start_all_process_time))) "Appdome Validate app took: "
     
 }
