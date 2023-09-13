@@ -148,9 +148,9 @@ print_json() {
     echo "validation_state:$validation_state"
 
     # Extract and format the messages
-    messages=$(echo "$json" | grep -o '"message":"[^"]*' | cut -d':' -f2 | tr -d '"' | sed 's/,/, /g; s/, /,\n/g')
+    messages=$(echo "$json" | grep -o '"message":"[^"]*' | cut -d':' -f2 | tr -d '"')
     
-    # Print the formatted messages
+    # Print the formatted messages with commas and newlines
     echo "$messages"
 
     # Check and print specific fields if they exist
@@ -162,6 +162,7 @@ print_json() {
     print_field_if_exists "app_build_number"
     print_field_if_exists "app_id"
 }
+
 
 
 # Check if a field exists in the JSON and print it if it does
