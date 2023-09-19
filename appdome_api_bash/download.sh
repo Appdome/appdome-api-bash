@@ -45,6 +45,12 @@ download() {
   echo "Starting $1"
   start_download_time=$(date +%s)
 
+  directory=$(dirname "$3")
+  if [ ! -d "$directory" ]; then
+    mkdir -p "$directory"
+    echo "Created missing directories: $directory"
+  fi
+
   local headers="$(request_headers)"
   local request="curl -s -w \"%{http_code}\" --location --request GET \
                   $2 \
