@@ -32,7 +32,7 @@ else
 fi
 
 main() {
-  echo "2@"
+  echo "$@"
   parse_args "$@"
   start_all_process_time=$(date +%s)
   echo "Starting Appdome flow"
