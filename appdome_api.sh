@@ -34,6 +34,7 @@ fi
 main() {
   echo "$@"
   parse_args "$@"
+  echo $SERVER_URL
   start_all_process_time=$(date +%s)
   echo "Starting Appdome flow"
   echo ""
