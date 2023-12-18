@@ -24,6 +24,8 @@ validate_files() {
 }
 
 validate_response_for_errors() {
+  echo "$1"
+  echo "$2"
   if [[ "$1" == *"error"* ]]; then
     echo "$2 failed. Error: $1"
     exit 1
