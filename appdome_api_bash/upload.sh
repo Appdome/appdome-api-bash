@@ -6,7 +6,7 @@ get_upload_link() {
   publicLink=$(curl -s --request GET \
     --url "$SERVER_URL/api/v1/upload-link?team_id=$TEAM_ID" \
     --header "Authorization: $API_KEY")
-  echo $publicLink
+  echo "public link:  $publicLink"
   validate_response_for_errors "$publicLink" $operation
 }
 
@@ -15,7 +15,7 @@ upload_to_aws() {
   aws_put_response=$(curl -s -X PUT "$(extract_string_value_from_json "$publicLink" "url")" \
     --header 'Content-Type: application/x-compressed-tar' \
     -T "${APP_LOCATION}")
-  echo $aws_put_response
+  echo "aws_put_response:  $aws_put_response"
   validate_response_for_errors "$aws_put_response" $operation
 }
 
@@ -30,7 +30,7 @@ upload_using_link() {
       --form file_name="$APP_FILE_NAME" \
       --form file_app_id="$(extract_string_value_from_json "$publicLink" "file_id")"
   )
-  echo $APP
+  echo "APP: $APP"
   validate_response_for_errors "$APP" $operation
 }
 
