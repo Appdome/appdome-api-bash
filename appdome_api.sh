@@ -69,7 +69,7 @@ main() {
     download_certified_secure
   fi
 
-  if [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
+  if statusForObfuscation && [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
     download_deobfuscation_script
   fi
 
