@@ -84,6 +84,7 @@ help() {
   echo "-so   |  --second_output                     Second_output_app_file (optional)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
   echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
+  echo "-aid  |  --app_id                           App ID in Firebase project (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
   echo "-bl   |  --build_logs                       Build with diagnostic logs (optional)"
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
@@ -161,6 +162,10 @@ parse_args() {
       ;;
     -dso | --deobfuscation_script_output)
       DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION=$2
+      shift 2
+      ;;
+    -aid | --app_id)
+      APP_ID=$2
       shift 2
       ;;
     -bv | --build_overrides)

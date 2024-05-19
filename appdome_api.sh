@@ -9,6 +9,7 @@ source ./appdome_api_bash/sign.sh
 source ./appdome_api_bash/auto_dev_sign.sh
 source ./appdome_api_bash/download.sh
 source ./appdome_api_bash/status.sh
+source ./appdome_api_bash/crashlytics.sh
 
 
 SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
@@ -70,7 +71,8 @@ main() {
   fi
 
   if statusForObfuscation && [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
-    download_deobfuscation_script
+    download_deobfuscation_script 
+    upload_deofiscation_mapping_to_crashlytics   
   fi
 
   if [[ -n "$SECOND_OUTPUT_FILE" ]]; then
