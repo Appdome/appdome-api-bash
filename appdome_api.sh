@@ -72,7 +72,7 @@ main() {
 
   if statusForObfuscation && [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
     download_deobfuscation_script 
-    upload_deofiscation_mapping_to_crashlytics   
+    upload_deobfuscation_mapping_to_crashlytics   
   fi
 
   if [[ -n "$SECOND_OUTPUT_FILE" ]]; then

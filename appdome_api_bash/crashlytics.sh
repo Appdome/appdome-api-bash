@@ -1,15 +1,15 @@
 #!/bin/bash
 
-upload_deofiscation_mapping_to_crashlytics() {
+upload_deobfuscation_mapping_to_crashlytics() {
     skip=false
 
     if [[ -z $GOOGLE_APPLICATION_CREDENTIALS ]]; then
-        echo "WARNING: Missing Google authentication service file. Skipping code obfustaction mapping file uploading to Cashlytics."
+        echo "WARNING: Missing Google authentication service file. Skipping code deobfuscation mapping file uploading to Crashlytics."
         skip=true	
     fi
 
     if [[ -z $APP_ID ]]; then
-        echo "WARNING: Missing Firebase project app ID. Skipping code obfustaction mapping file uploading to Cashlytics."
+        echo "WARNING: Missing Firebase project app ID. Skipping code deobfuscation mapping file uploading to Crashlytics."
         skip=true	
     fi
 
@@ -17,12 +17,12 @@ upload_deofiscation_mapping_to_crashlytics() {
     cd deobfuscation_mapping_files
 
     if [[ ! -f mapping.txt ]]; then
-        echo "WARNING: Missing mapping.txt file. Skipping code obfustaction mapping file uploading to Cashlytics."
+        echo "WARNING: Missing mapping.txt file. Skipping code deobfuscation mapping file uploading to Crashlytics."
         skip=true
     fi
 
     if [[ ! -f com_google_firebase_crashlytics_mappingfileid.xml ]]; then
-        echo "WARNING: Missing com_google_firebase_crashlytics_mappingfileid.xml file. Skipping code obfustaction mapping file uploading to Cashlytics."
+        echo "WARNING: Missing com_google_firebase_crashlytics_mappingfileid.xml file. Skipping code deobfuscation mapping file uploading to Crashlytics."
         skip=true
     fi
 
