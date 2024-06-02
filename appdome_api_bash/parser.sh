@@ -46,14 +46,14 @@ validate_inputs() {
   case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_files "Provisioning profile" "$PROVISIONING_PROFILES"
+      validate_files "Provisioning profile" ${PROVISIONING_PROFILES[@]}
     else
       validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
     fi
     ;;
   "$AUTO_DEV_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_files "Signing" "$PROVISIONING_PROFILES" "$ENTITLEMENTS"
+      validate_files "Signing" ${PROVISIONING_PROFILES[@]} ${ENTITLEMENTS[@]}
     else
       validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
     fi
@@ -61,7 +61,7 @@ validate_inputs() {
   "$SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
       validate_args "Signing parameters" "$KEYSTORE_PASS"
-      validate_files "Signing" "$PROVISIONING_PROFILES" "$SIGNING_KEYSTORE" "$ENTITLEMENTS"
+      validate_files "Signing" ${PROVISIONING_PROFILES[@]} "$SIGNING_KEYSTORE" ${ENTITLEMENTS[@]}
     else
       validate_args "Signing parameters" "$KEYSTORE_PASS" "$KEYSTORE_ALIAS" "$KEYS_PASS"
       validate_files "Signing" "$SIGNING_KEYSTORE"
