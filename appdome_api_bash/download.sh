@@ -35,6 +35,12 @@ download_certified_secure() {
   download "$operation" "$url" "$CERTIFICATE_OUTPUT_LOCATION"
 }
 
+download_certified_secure_json_test() {
+  local operation="Download Certified Secure JSON"
+  local url="--url '$SERVER_URL/api/v1/tasks/$TASK_ID/certificate-json?team_id=$TEAM_ID'"
+  download "$operation" "$url" "$CERTIFICATE_JSON_OUTPUT_LOCATION"
+}
+
 download_second_output() {
   local operation="Download Second Output"
   local url="--url '$SERVER_URL/api/v1/tasks/$TASK_ID/output?team_id=$TEAM_ID&action=sign_second_output'"

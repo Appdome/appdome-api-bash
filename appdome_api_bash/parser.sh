@@ -83,6 +83,7 @@ help() {
   echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
   echo "-so   |  --second_output                     Second_output_app_file (optional)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
+  echo "-cj   |  --certificate_json                 Output file for Certified Secure json (optional)"
   echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
   echo "-aid  |  --app_id                           App ID in Firebase project (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
@@ -158,6 +159,10 @@ parse_args() {
       ;;
     -co | --certificate_output)
       CERTIFICATE_OUTPUT_LOCATION=$2
+      shift 2
+      ;;
+    -cj | --certificate_json)
+      CERTIFICATE_JSON_OUTPUT_LOCATION=$2
       shift 2
       ;;
     -dso | --deobfuscation_script_output)
