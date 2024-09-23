@@ -29,7 +29,10 @@ upload_deobfuscation_mapping_to_crashlytics() {
     fi
 
     if [[ $skip == false ]]; then
-        echo "RUNNING CRASHLYSTICS"
-        firebase crashlytics:mappingfile:upload --app=$APP_ID --resource-file=com_google_firebase_crashlytics_mappingfileid.xml mapping.txt
+        if command -v firebase >/dev/null 2>&1; then
+            firebase crashlytics:mappingfile:upload --app=$APP_ID --resource-file=com_google_firebase_crashlytics_mappingfileid.xml mapping.txt
+        else
+            echo "ERROR: Firebase CLI is not installed. Please install it to continue."
+        fi
     fi
 }
