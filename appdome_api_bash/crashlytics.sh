@@ -6,6 +6,8 @@ upload_deobfuscation_mapping_to_crashlytics() {
     if [[ -z $GOOGLE_APPLICATION_CREDENTIALS ]]; then
         echo "WARNING: Missing Google authentication service file. Skipping code deobfuscation mapping file uploading to Crashlytics."
         skip=true	
+    else
+        echo "Google Application Credentials: $GOOGLE_APPLICATION_CREDENTIALS"
     fi
 
     if [[ -z $APP_ID ]]; then
@@ -27,6 +29,7 @@ upload_deobfuscation_mapping_to_crashlytics() {
     fi
 
     if [[ $skip == false ]]; then
+        echo "RUNNING CRASHLYSTICS"
         firebase crashlytics:mappingfile:upload --app=$APP_ID --resource-file=com_google_firebase_crashlytics_mappingfileid.xml mapping.txt
     fi
 }

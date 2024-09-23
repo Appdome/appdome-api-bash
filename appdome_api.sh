@@ -75,7 +75,9 @@ main() {
   fi
 
   if statusForObfuscation && [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
+    echo "Download obfuscation"
     download_deobfuscation_script 
+    echo "Running Crashlytics"
     upload_deobfuscation_mapping_to_crashlytics   
   fi
 
