@@ -26,11 +26,11 @@ sign_ios() {
   local request="curl -s --request POST \
                   --url '$SERVER_URL/api/v1/tasks?team_id=$TEAM_ID' \
                   $headers \
-                  --form action='$SIGN_ACTION' \
-                  --form parent_task_id='$TASK_ID' \
-                  --form signing_p12_content='@$SIGNING_KEYSTORE' \
+                  --form 'action=$SIGN_ACTION' \
+                  --form 'parent_task_id=$TASK_ID' \
+                  --form 'signing_p12_content=@$SIGNING_KEYSTORE' \
                   $provisioning_profiles_entitlements \
-                  --form overrides='$(echo "$SIGN_OVERRIDES")'"
+                  --form 'overrides=\"$(echo $SIGN_OVERRIDES | sed 's/"/\\\"/g')\"'"
   echo "Full request"
   echo $request
   SIGN="$(eval $request)"
