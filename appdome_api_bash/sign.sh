@@ -11,8 +11,8 @@ sign_ios() {
   echo "Sign Overrides"
   echo "$SIGN_OVERRIDES"
   echo "adding password"
-  escaped_pass=$(printf '%q' "$KEYSTORE_PASS")
-  add_sign_overrides "signing_p12_password" "$escaped_pass"
+#  escaped_pass=$(printf '%q' "$KEYSTORE_PASS")
+  add_sign_overrides "signing_p12_password" "$KEYSTORE_PASS"
   echo "Sign Overrides"
   echo "$SIGN_OVERRIDES"
   if [ ${#ENTITLEMENTS[@]} -gt 0 ]; then
