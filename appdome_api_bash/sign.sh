@@ -30,6 +30,8 @@ sign_ios() {
                   --form signing_p12_content='@$SIGNING_KEYSTORE' \
                   $provisioning_profiles_entitlements \
                   --form overrides='$(echo "$SIGN_OVERRIDES")'"
+  echo "Full request"
+  echo $request
   SIGN="$(eval $request)"
   validate_response_for_errors "$SIGN" $operation
   statusWaiter "$operation"
