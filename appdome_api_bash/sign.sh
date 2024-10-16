@@ -8,10 +8,18 @@ sign_ios() {
   local operation="Sign app"
   echo "Starting iOS Signing On Appdome"
   start_sign_time=$(date +%s)
+  echo "Sign Overrides"
+  echo "$SIGN_OVERRIDES"
+  echo "adding password"
   add_sign_overrides "signing_p12_password" "$KEYSTORE_PASS"
+  echo "Sign Overrides"
+  echo "$SIGN_OVERRIDES"
   if [ ${#ENTITLEMENTS[@]} -gt 0 ]; then
+    echo "adding manual_entitlements_matching"
     add_sign_overrides "manual_entitlements_matching" "true"
   fi
+  echo "Final Sign Overrides"
+  echo "$SIGN_OVERRIDES"
   local headers="$(request_headers)"
   local provisioning_profiles_entitlements=$(add_provisioning_profiles_entitlements)
   local request="curl -s --request POST \
