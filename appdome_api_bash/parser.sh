@@ -65,6 +65,9 @@ validate_inputs() {
     else
       validate_args "Signing parameters" "$KEYSTORE_PASS" "$KEYSTORE_ALIAS" "$KEYS_PASS"
       validate_files "Signing" "$SIGNING_KEYSTORE"
+      if [[ $GOOGLE_PLAY_SIGNING ]]; then
+        validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+      fi
     fi
     ;;
   esac
