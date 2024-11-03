@@ -45,6 +45,11 @@ request_headers() {
         --header 'X-Appdome-Client:$APPDOME_CLIENT_HEADER'"
 }
 
+request_api_key(){
+  echo $API_KEY
+}
+
+
 add_provisioning_profiles_entitlements() {
   provisioning_profiles_entitlements=""
   for i in "${PROVISIONING_PROFILES[@]}"; do
