@@ -84,7 +84,7 @@ help() {
   echo "-t    |  --team_id                          Appdome team id (optional)"
   echo "-a    |  --app                              Application location (required)"
   echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
-  echo "-so   |  --second_output                     Second_output_app_file (optional)"
+  echo "-so   |  --second_output                    Second_output_app_file (optional)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
   echo "-cj   |  --certificate_json                 Output file for Certified Secure json (optional)"
   echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
@@ -94,6 +94,7 @@ help() {
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
   echo "-btv  |  --build_to_test_vendor             Enter vendor name on which Build to Test will happen (optional)"
+  echo "-wol  |  --workflow_output_logs             Enter path to a workflow output logs file (optional)"
   echo
   echo "please use one of the following signing options (one of the three is required)"
   echo "-s    |  --sign_on_appdome                  Sign on Appdome"
@@ -166,6 +167,10 @@ parse_args() {
       ;;
     -cj | --certificate_json)
       CERTIFICATE_JSON_OUTPUT_LOCATION=$2
+      shift 2
+      ;;
+    -wol | --workflow_output_logs)
+      WORKFLOW_OUTPUT_LOGS=$2
       shift 2
       ;;
     -dso | --deobfuscation_script_output)
