@@ -10,7 +10,7 @@ source ./appdome_api_bash/auto_dev_sign.sh
 source ./appdome_api_bash/download.sh
 source ./appdome_api_bash/status.sh
 source ./appdome_api_bash/crashlytics.sh
-
+source ./appdome_api_bash/datadog.sh
 
 SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
 API_KEY="${API_KEY_ENV:-}"
@@ -75,8 +75,17 @@ main() {
   fi
 
   if statusForObfuscation && [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
-    download_deobfuscation_script 
-    upload_deobfuscation_mapping_to_crashlytics   
+    download_deobfuscation_script
+
+    # Check for Crashlytics API key before calling upload function
+    if [[ -n "$APP_ID" ]]; then
+        upload_deobfuscation_mapping_to_crashlytics
+    fi
+    # Check for DataDog API key before calling upload function
+    if [[ -n "$DD_API_KEY" ]]; then
+        upload_deobfuscation_mapping_to_datadog
+    fi
+
   fi
 
   if [[ -n "$SECOND_OUTPUT_FILE" ]]; then
