@@ -24,4 +24,6 @@ upload_deobfuscation_mapping_to_crashlytics() {
     if [[ $skip == false ]]; then
         firebase crashlytics:mappingfile:upload --app=$APP_ID --resource-file=com_google_firebase_crashlytics_mappingfileid.xml mapping.txt
     fi
+
+    rm -rf deobfuscation_mapping_files
 }
