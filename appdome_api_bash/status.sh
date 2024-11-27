@@ -4,11 +4,11 @@ source ./utils.sh
 statusWaiter() {
   echo ""
   STATUS="progress"
-  local lastDate="$(date -u +"%Y-%m-%dT00:00:00Z")"
+  local lastDate="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"  # Ensure URL-safe date formatting
   local operation="$1"
   local file_path=$WORKFLOW_OUTPUT_LOGS
   local isMessages=false
-  
+
   if [[ -n "$file_path" ]]; then
     echo "$operation" >> "$file_path"
     echo "" >> "$file_path"
@@ -16,11 +16,15 @@ statusWaiter() {
   fi
 
   while [ "$STATUS" = "progress" ]; do
+ 
     local base_url="$SERVER_URL/api/v1/tasks/$TASK_ID/status?team_id=$TEAM_ID"
-
     if [[ "$isMessages" == true ]]; then
+      local encoded_lastDate=$(urlencode "$lastDate")
       base_url+="&messages=true&lastDate=$lastDate"
     fi
+
+
+  
     STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" --request GET \
       --url "$base_url" \
       --header "Authorization: $(request_api_key)" \
@@ -36,37 +40,32 @@ statusWaiter() {
       exit 1
     fi
 
-    STATUS=$(echo "$HTTP_BODY" | jq -r '.status')
+    STATUS=$(extract_string_value_from_json "$HTTP_BODY" 'status')
 
     if [[ "$isMessages" == true ]]; then
-      local messages=$(echo "$HTTP_BODY" | jq -c '.messages[]?')
-      if [[ -n "$messages" ]]; then
-        echo "$messages" | while read -r message; do
-          local message_text=$(echo "$message" | jq -r '.message.text // empty')
-          local message_type=$(echo "$message" | jq -r '.message_type')
-          local progress_total=$(echo "$message" | jq -r '.message.total // empty')
-          local progress_current=$(echo "$message" | jq -r '.message.current // empty')
-
-          if [[ -n "$message_text" ]]; then
-            echo " - $message_text"
-            if [[ -n "$file_path" ]]; then
-              echo " - $message_text" >> "$file_path"
-            fi
+      local messages_exist=$(echo "$HTTP_BODY" | grep -o '"messages":\[\]')
+      if [[ "$messages_exist" != '"messages":[]' ]]; then
+        echo "$HTTP_BODY" | grep -o '"text":"[^"]*' | cut -d'"' -f4 | while read -r message_text; do
+          echo " - $message_text"
+          if [[ -n "$file_path" ]]; then
+            echo " - $message_text" >> "$file_path"
           fi
         done
-
-        lastDate=$(echo "$HTTP_BODY" | jq -r '.messages | sort_by(.creation_time) | .[-1].creation_time')
+        local newDate=$(echo "$HTTP_BODY" | grep -o '"creation_time":"[^"]*' | cut -d'"' -f4 | tail -n1)
+        if [[ -n "$newDate" ]]; then
+          lastDate="$newDate"  # Only update lastDate if new messages were found
+        fi
       fi
-      sleep 1
     else
+      # If isMessages is false, just print dots
       printf '.'
-      sleep 1
     fi
+    sleep 1
   done
 
   if [[ "$STATUS" != "completed" ]]; then
     echo "$operation failed"
-    local reason=$(echo "$HTTP_BODY" | jq -r '.message')
+    local reason=$(extract_string_value_from_json "$HTTP_BODY" 'message')
     echo "Reason: $reason"
     exit 1
   else
@@ -77,6 +76,18 @@ statusWaiter() {
     fi
   fi
 }
+
+urlencode() {
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            *) printf '%%%02X' "'$c" ;;
+        esac
+    done
+}
+
 
 statusForObfuscation() {
   local headers="$(request_headers)"
