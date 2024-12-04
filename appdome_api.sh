@@ -26,11 +26,8 @@ CONTEXT_OVERRIDES="{}"
 SIGN_OVERRIDES="{}"
 
 
-if [[ -z "$APPDOME_CLIENT_HEADER" ]]; then
-  APPDOME_CLIENT_HEADER='Appdome-cli-bash/1.0'
-else
-  APPDOME_CLIENT_HEADER=$(printenv APPDOME_CLIENT_HEADER)
-fi
+
+assign_client_header
 
 main() {
   parse_args "$@"

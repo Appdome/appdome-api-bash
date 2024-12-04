@@ -54,11 +54,7 @@ APP_LOCATION=''
 PLATFORM=''
 APP_FILE_NAME="$(basename -- "$APP_LOCATION")"
 
-if [[ -z "$APPDOME_CLIENT_HEADER" ]]; then
-  APPDOME_CLIENT_HEADER='Appdome-cli-bash/1.0'
-else
-  APPDOME_CLIENT_HEADER=$(printenv APPDOME_CLIENT_HEADER)
-fi
+assign_client_header
  
 
 validation_upload(){

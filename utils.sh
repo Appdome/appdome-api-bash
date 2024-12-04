@@ -3,6 +3,14 @@ add_google_play_signing_fingerprint() {
   add_sign_overrides "signing_keystore_google_signing_sha1_key" "$SIGNING_FINGERPRINT"
 }
 
+assign_client_header() {
+  if [[ -z "$APPDOME_CLIENT_HEADER" ]]; then
+    APPDOME_CLIENT_HEADER='Appdome-cli-bash/1.0'
+  else
+    APPDOME_CLIENT_HEADER=$(printenv APPDOME_CLIENT_HEADER)
+  fi
+}
+
 validate_args() {
   args=("$@")
   for ((i = 1; i < $#; i++)); do

@@ -85,7 +85,7 @@ statusForObfuscation() {
                   $headers"
   local response="$(eval $request)"
 
-  if echo "$response" | jq -e '.obfuscationMapExists == true' >/dev/null; then
+  if [[ $(extract_string_value_from_json "$response" 'obfuscationMapExists') == "true" ]]; then
     return 0
   else
     return 1
