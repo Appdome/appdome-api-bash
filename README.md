@@ -78,8 +78,8 @@ All APIs are documented in https://apis.appdome.com/docs.
 --fusion_set_id <fusion-set-id> \
 --team_id <team-id> \
 --app <zip file> \
---keystore <keystore file> \ # only needed for sign with Appdome
---keystore_pass <keystore password> \ # only needed for sign with Appdome
+--keystore <keystore file> \ # only needed for sign on Appdome
+--keystore_pass <keystore password> \ # only needed for sign on Appdome
 --output <output zip> \
 --certificate_output <output certificate pdf> \
 --build_overrides <json_file_path> 
