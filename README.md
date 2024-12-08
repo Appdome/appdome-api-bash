@@ -37,6 +37,19 @@ All APIs are documented in https://apis.appdome.com/docs.
 --sign_overrides <json_file_path>
 ```
 
+#### Android SDK Example:
+
+```bash
+./appdome_api_sdk.sh \
+--api_key <api key> \
+--fusion_set_id <fusion-set-id> \
+--team_id <team-id> \
+--app <aar> \
+--output <output aar> \
+--certificate_output <output certificate pdf> \
+--build_overrides <json_file_path> 
+```
+
 #### iOS Example:
 
 ```bash
@@ -55,4 +68,19 @@ All APIs are documented in https://apis.appdome.com/docs.
 --build_overrides <json_file_path> \
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
+```
+
+#### iOS SDK Example:
+
+```bash
+./appdome_api_sdk.sh \
+--api_key <api key> \
+--fusion_set_id <fusion-set-id> \
+--team_id <team-id> \
+--app <zip file> \
+--keystore <keystore file> \ # only needed for sign on Appdome
+--keystore_pass <keystore password> \ # only needed for sign on Appdome
+--output <output zip> \
+--certificate_output <output certificate pdf> \
+--build_overrides <json_file_path> 
 ```

@@ -61,9 +61,9 @@ upload_deobfuscation_mapping_to_datadog() {
       # Proceed with the upload only if skip is false
     if [[ $skip == false ]]; then
         # Read metadata from data_dog_metadata.json
-        build_id=$(jq -r '.build_id' data_dog_metadata.json)
-        service_name=$(jq -r '.service_name' data_dog_metadata.json)
-        version=$(jq -r '.version' data_dog_metadata.json)
+        build_id=$(extract_string_value_from_json data_dog_metadata.json 'build_id')
+        service_name=$(extract_string_value_from_json data_dog_metadata.json 'service_name')
+        version=$(extract_string_value_from_json data_dog_metadata.json 'version')
 
         if [[ -z $build_id || -z $service_name || -z $version ]]; then
             echo "ERROR: Missing required metadata (build_id, service_name, or version) in data_dog_metadata.json."
