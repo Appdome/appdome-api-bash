@@ -28,7 +28,9 @@ validate_inputs() {
   # validate api key arguments
   validate_args "Final Output Location" "$FINAL_OUTPUT_LOCATION"
   if [[ -n "$WORKFLOW_OUTPUT_LOGS" ]]; then
-    validate_files "Workflow Logs" "$WORKFLOW_OUTPUT_LOGS"
+    if [[ -d "$WORKFLOW_OUTPUT_LOGS" ]]; then
+      WORKFLOW_OUTPUT_LOGS="$WORKFLOW_OUTPUT_LOGS/workflow.log"
+    fi
   fi
 }
 

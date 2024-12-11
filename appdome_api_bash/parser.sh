@@ -78,9 +78,6 @@ validate_inputs() {
     if [[ -d "$WORKFLOW_OUTPUT_LOGS" ]]; then
       WORKFLOW_OUTPUT_LOGS="$WORKFLOW_OUTPUT_LOGS/workflow.log"
     fi
-    if [[ ! -f "$WORKFLOW_OUTPUT_LOGS" ]]; then
-      touch "$WORKFLOW_OUTPUT_LOGS"
-    fi
   fi
 }
 
