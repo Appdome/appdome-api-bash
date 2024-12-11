@@ -88,15 +88,21 @@ urlencode() {
     done
 }
 
-
 statusForObfuscation() {
   local headers="$(request_headers)"
-  local request="curl -s --request GET \
+  if [[ -n $TEAM_ID ]]; then
+    local request="curl -s --request GET \
                   --url '$SERVER_URL/api/v1/tasks/$TASK_ID/status?team_id=$TEAM_ID' \
                   $headers"
-  local response="$(eval $request)"
+  else
+    local request="curl -s --request GET \
+                  --url '$SERVER_URL/api/v1/tasks/$TASK_ID/status' \
+                  $headers"
+  fi
 
-  if [[ $(extract_string_value_from_json "$response" 'obfuscationMapExists') == "true" ]]; then
+  local response="$(eval $request)"
+  obfuscation_map_exists=$(echo $response | grep -o '"obfuscationMapExists":[^,]*' | grep -o 'true\|false')
+  if [[ "$obfuscation_map_exists" == "true" ]]; then
     return 0
   else
     return 1
