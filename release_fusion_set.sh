@@ -54,15 +54,20 @@ release_fusion_set(){
     local operation="Release fustion set"
     local URL="$SERVER_URL/api/v1/release_fs/$FUSION_SET_ID?team_id=$TEAM_ID"
 
-    STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" --request POST \
-      --url "$URL" \
-      --header "Authorization: $(request_api_key)" \
-      --header "Content-Type: application/json" \
-      --header "X-Appdome-Client:$APPDOME_CLIENT_HEADER" \
-      --header "accept: application/json")
+    local request="curl -s --request POST \
+                  --url "$URL" \
+                  --header 'Authorization: $(request_api_key)' \
+                  --header 'Content-Type: application/json' \
+                  --header 'X-Appdome-Client:$APPDOME_CLIENT_HEADER' \
+                  --header 'accept: application/json'"
+  
+    NEW_FUSION_SET_ID_RESPONSE="$(eval $request)"
+    validate_response_for_errors "$NEW_FUSION_SET_ID_RESPONSE" $operation
+    NEW_FUSION_SET_ID=$(extract_string_value_from_json $NEW_FUSION_SET_ID_RESPONSE "new_fusion_set_id")
 
     validate_response_for_errors "$STATUS_RESPONSE" $operation
     echo "Fusion-set $FUSION_SET_ID was successfully released to team: $TEAM_ID"
+    echo "New Fusion-set id: $NEW_FUSION_SET_ID"
 }
 
 main() {
