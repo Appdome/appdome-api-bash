@@ -88,6 +88,18 @@ EOF
         # Set the DataDog API URL
         url="https://sourcemap-intake.datadoghq.com/api/v2/srcmap"
 
+        cmd="curl -w \"%{http_code}\" -o /dev/null -X POST \"$url\" \
+            -H \"Content-Type: multipart/form-data; boundary=$boundary\" \
+            -H \"Accept-Encoding: gzip\" \
+            -H \"dd-evp-origin: dd-sdk-android-gradle-plugin\" \
+            -H \"dd-evp-origin-version: 1.13.0\" \
+            -H \"dd-api-key: $DD_API_KEY\" \
+            --data-binary \"$multipart_message\""
+
+        echo "Running command: $cmd"
+
+        set -x
+
         # Send the request with curl
         response=$(curl -w "%{http_code}" -o /dev/null -X POST "$url" \
             -H "Content-Type: multipart/form-data; boundary=$boundary" \
@@ -97,6 +109,7 @@ EOF
             -H "dd-api-key: $DD_API_KEY" \
             --data-binary "$multipart_message")
 
+        set +x
         # Check response status
         if [[ $response -eq 202 ]]; then
             echo "Mapping file uploaded successfully to DataDog!"
