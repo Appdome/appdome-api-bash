@@ -89,11 +89,9 @@ EOF
 
         # Generate the multipart message body
         multipart_file=$(create_multipart_message "$boundary" "$event_json" "mapping.txt")
-        
+
         # Set the DataDog API URL
         url="https://sourcemap-intake.datadoghq.com/api/v2/srcmap"
-
-        set -x
 
         # Send the request with curl
         response=$(curl -w "%{http_code}" -o /dev/null -X POST "$url" \
