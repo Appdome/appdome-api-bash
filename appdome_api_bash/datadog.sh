@@ -6,26 +6,31 @@ boundary="6bd84d1042f94cc7baf9ca62779f64d7"
 DD_SITE="datadoghq.com"
 # Create the multipart message for event JSON and mapping file
 create_multipart_message() {
+    local temp_file=$(mktemp)
     local boundary=$1
     local event_data=$2
     local mapping_file_path=$3
 
-    # Start with event JSON
-    echo "--$boundary"
-    echo 'Content-Disposition: form-data; name="event"; filename="event.json"'
-    echo 'Content-Type: application/json; charset=utf-8'
-    echo
-    echo "$event_data"
+    {
+        # Start with event JSON
+        echo "--$boundary"
+        echo 'Content-Disposition: form-data; name="event"; filename="event.json"'
+        echo 'Content-Type: application/json; charset=utf-8'
+        echo
+        echo "$event_data"
 
-    # Now the mapping file
-    echo "--$boundary"
-    echo 'Content-Disposition: form-data; name="jvm_mapping_file"; filename="jvm_mapping"'
-    echo 'Content-Type: text/plain'
-    echo
-    cat "$mapping_file_path"  # Embed file content here
+        # Now the mapping file
+        echo "--$boundary"
+        echo 'Content-Disposition: form-data; name="jvm_mapping_file"; filename="jvm_mapping"'
+        echo 'Content-Type: text/plain'
+        echo
+        cat "$mapping_file_path"  # Embed file content here
 
-    # Closing boundary
-    echo "--$boundary--"
+        # Closing boundary
+        echo "--$boundary--"
+    } > "$temp_file"
+
+    echo "$temp_file"
 }
 upload_deobfuscation_mapping_to_datadog() {
     skip=false
@@ -83,7 +88,7 @@ EOF
         )
 
         # Generate the multipart message body
-        multipart_message=$(create_multipart_message "$boundary" "$event_json" "mapping.txt")
+        multipart_file=$(create_multipart_message "$boundary" "$event_json" "mapping.txt")
 
         # Set the DataDog API URL
         url="https://sourcemap-intake.datadoghq.com/api/v2/srcmap"
@@ -95,7 +100,7 @@ EOF
             -H "dd-evp-origin: dd-sdk-android-gradle-plugin" \
             -H "dd-evp-origin-version: 1.13.0" \
             -H "dd-api-key: $DD_API_KEY" \
-            --data-binary "$multipart_message")
+            --data-binary "@$multipart_file")
 
         # Check response status
         if [[ $response -eq 202 ]]; then
@@ -108,4 +113,7 @@ EOF
     # Cleanup
     cd ..
     rm -rf deobfuscation_mapping_files
+
+    # Clean up the temporary file
+    rm -f "$multipart_file"
 }
