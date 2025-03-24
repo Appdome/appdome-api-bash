@@ -88,6 +88,16 @@ EOF
         # Set the DataDog API URL
         url="https://sourcemap-intake.datadoghq.com/api/v2/srcmap"
 
+
+        echo "Debug print:"
+        echo curl -w "%{http_code}" -o /dev/null -X POST "$url" \
+            -H "Content-Type: multipart/form-data; boundary=$boundary" \
+            -H "Accept-Encoding: gzip" \
+            -H "dd-evp-origin: dd-sdk-android-gradle-plugin" \
+            -H "dd-evp-origin-version: 1.13.0" \
+            -H "dd-api-key: $DD_API_KEY" \
+            --data-binary "$multipart_message"
+
         # Send the request with curl
         response=$(curl -w "%{http_code}" -o /dev/null -X POST "$url" \
             -H "Content-Type: multipart/form-data; boundary=$boundary" \
