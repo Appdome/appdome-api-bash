@@ -34,7 +34,11 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
   fi
   # Add overrides
   request+=" --form overrides='$(echo "$BUILD_OVERRIDES")'"
-  
+  # Add certificate pinning files if provided
+  if [[ -n "$CERT_ZIP" ]]; then
+    certs=$(init_certs_pinning "$CERT_ZIP")
+    request+=" $certs"
+  fi
   TASK_ID="$(eval $request)"
   validate_response_for_errors "$TASK_ID" $operation
   TASK_ID=$(extract_string_value_from_json $TASK_ID "task_id")
