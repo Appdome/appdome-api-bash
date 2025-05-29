@@ -28,8 +28,12 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
                   $headers \
                   --form action=fuse \
                   --form fusion_set_id='$FUSION_SET_ID' \
-                  --form app_id='$(extract_string_value_from_json "$APP" "id")' \
-                  --form overrides='$(echo "$BUILD_OVERRIDES")'"
+                  --form app_id='$(extract_string_value_from_json "$APP" "id")'"
+  if [[ -n "$BASELINE_PROFILE" && -f "$BASELINE_PROFILE" ]]; then
+    request+=" --form baseline_profile=@\"$BASELINE_PROFILE\""
+  fi
+  # Add overrides
+  request+=" --form overrides='$(echo "$BUILD_OVERRIDES")'"
   
   TASK_ID="$(eval $request)"
   validate_response_for_errors "$TASK_ID" $operation

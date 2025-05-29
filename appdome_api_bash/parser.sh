@@ -95,6 +95,7 @@ help() {
   echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with "Obfuscate App Logic" (optional)"
   echo "-aid  |  --app_id                           App ID in Firebase project (optional)"
   echo "-dd_api_key | --datadog_api_key             Data Dog API_KEY (required for DataDog Deobfuscation) (optional)"
+  echo "-baseline_profile | --baseline_profile      baseline profile file to use (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
   echo "-bl   |  --build_logs                       Build with diagnostic logs (optional)"
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
@@ -226,6 +227,11 @@ parse_args() {
       ;;
     -kp | --keystore_pass)
       KEYSTORE_PASS="$2"
+      shift 2
+      ;;
+
+    -baseline_profile | --baseline_profile)
+      BASELINE_PROFILE="$2"
       shift 2
       ;;
     -ka | --keystore_alias)
