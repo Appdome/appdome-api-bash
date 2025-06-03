@@ -36,6 +36,7 @@ All APIs are documented in https://apis.appdome.com/docs.
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
 --baseline_profile <zip file for build with baseline profile>
+--cert_pinning_zip <zip file containing dynamic certificates>
 ```
 
 #### Android SDK Example:
@@ -69,6 +70,7 @@ All APIs are documented in https://apis.appdome.com/docs.
 --build_overrides <json_file_path> \
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
+--cert_pinning_zip <zip file containing dynamic certificates>
 ```
 
 #### iOS SDK Example:
