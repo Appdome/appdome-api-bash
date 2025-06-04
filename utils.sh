@@ -128,10 +128,31 @@ init_certs_pinning() {
     return 0
   fi
 
-  local extract_path="${cert_pinning_zip%.*}"  # Extract to a folder with the same name as the zip
-  unzip -q "$cert_pinning_zip" -d "$extract_path"
+  local extract_path="${cert_pinning_zip%.*}"  # target directory
 
-  # Locate the JSON file and parse it
+  # ── Step A: remove any existing directory first ─────────────────────────────
+  if [[ -d "$extract_path" ]]; then
+    rm -rf "$extract_path"
+    if [[ $? -ne 0 ]]; then
+      echo "Failed to remove existing directory: $extract_path" >&2
+      return 1
+    fi
+  fi
+
+  # ── Step B: unzip into a “clean slate” directory ──────────────────────────────
+  unzip -q "$cert_pinning_zip" -d "$extract_path"
+  if [[ $? -ne 0 ]]; then
+    echo "Unzip failed." >&2
+    return 1
+  fi
+
+  # Now $extract_path is freshly recreated. You can, if you wish, verify:
+  if [[ ! -d "$extract_path" ]]; then
+    echo "Extraction did not create $extract_path as expected." >&2
+    return 1
+  fi
+
+  # ── Step C: locate the JSON, parse cert entries ─────────────────────────────
   local json_file
   json_file=$(find "$extract_path" -type f -name "*.json" | head -n 1)
   if [[ -z "$json_file" ]]; then
@@ -139,7 +160,6 @@ init_certs_pinning() {
     return 0
   fi
 
-  # Read the JSON file and prepare the certs list
   while IFS= read -r line; do
     local index file_name
     index=$(echo "$line" | grep -Eo '"[^"]+"' | head -n1 | tr -d '"')
@@ -149,5 +169,6 @@ init_certs_pinning() {
       certs+=("--form 'mitm_host_server_pinned_certs_list['\\''${index}'\\''].value.mitm_host_server_pinned_certs_file_content=@\"${file_path}\"'")
     fi
   done < <(grep -Eo '"[^"]+"\s*:\s*"[^"]+"' "$json_file")
+
   echo "${certs[@]}"
 }
