@@ -2,6 +2,7 @@
 
 source ./appdome_api_bash/parser.sh
 source ./appdome_api_bash/upload.sh
+source ./appdome_api_bash/direct_upload.sh
 source ./appdome_api_bash/build.sh
 source ./appdome_api_bash/context.sh
 source ./appdome_api_bash/private_sign.sh
@@ -35,8 +36,12 @@ main() {
   echo "Starting Appdome flow"
   echo ""
  
-
-  upload
+  if [[ "$DIRECT_UPLOAD" == "true" ]]; then
+    echo "Uploading app directly to Appdome"
+    direct_upload
+  else
+    upload
+  fi
   build
   case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")

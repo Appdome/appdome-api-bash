@@ -39,6 +39,7 @@ help() {
   echo
   echo "-key  |  --api_key                          Appdome API key (required)"
   echo "-fs   |  --fusion_set_id                    Fusion-set-id to use (required)"
+  echo "-du   |  --direct_upload                    Upload app directly to Appdome, and not through aws pre-signed url (optional)"
   echo "-t    |  --team_id                          Appdome team id (optional)"
   echo "-a    |  --app                              .aar/.zip file (SDK) location (required)"
   echo "-o    |  --output                           Output file for fused and signed SDK after Appdome (required)"
@@ -66,6 +67,10 @@ parse_args() {
     -fs | --fusion_set_id)
       FUSION_SET_ID="$2"
       shift 2
+      ;;
+    -du | --direct_upload)
+      DIRECT_UPLOAD=true
+      shift 1
       ;;
     -a | --app)
       APP_LOCATION="$2"
