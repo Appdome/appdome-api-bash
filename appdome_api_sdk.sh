@@ -2,6 +2,7 @@
 
 source ./appdome_api_bash/parser_sdk.sh
 source ./appdome_api_bash/upload.sh
+source ./appdome_api_bash/direct_upload.sh
 source ./appdome_api_bash/build.sh
 source ./appdome_api_bash/private_sign.sh
 source ./appdome_api_bash/sign.sh
@@ -28,7 +29,12 @@ main() {
   echo "Starting Appdome flow"
   echo ""
 
-  upload
+  if [[ "$DIRECT_UPLOAD" == "true" ]]; then
+    echo "Uploading app directly to Appdome"
+    direct_upload
+  else
+    upload
+  fi
   build
 
   if [[ $PLATFORM == "IOS" ]]; then
