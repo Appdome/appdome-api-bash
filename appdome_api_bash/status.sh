@@ -23,22 +23,39 @@ statusWaiter() {
       base_url+="&messages=true&lastDate=$lastDate"
     fi
 
+    # ---
+    # Retry logic: Attempt the HTTP request up to 5 times if it fails (HTTP_CODE != 200).
+    # Only show the detailed error message and exit if all retries fail.
+    # During retries, no error details are shown (only a sleep between attempts).
+    # ---
+    local max_retries=5
+    local attempt=1
+    local last_http_code=""
+    local last_http_body=""
+    while true; do
+      STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" --request GET \
+        --url "$base_url" \
+        --header "Authorization: $(request_api_key)" \
+        --header "Content-Type: application/json" \
+        --header "accept: application/json")
 
-  
-    STATUS_RESPONSE=$(curl -s -w "\n%{http_code}" --request GET \
-      --url "$base_url" \
-      --header "Authorization: $(request_api_key)" \
-      --header "Content-Type: application/json" \
-      --header "accept: application/json")
+      HTTP_BODY=$(echo "$STATUS_RESPONSE" | sed '$d')
+      HTTP_CODE=$(echo "$STATUS_RESPONSE" | tail -n1)
+      last_http_code="$HTTP_CODE"
+      last_http_body="$HTTP_BODY"
 
-    HTTP_BODY=$(echo "$STATUS_RESPONSE" | sed '$d')
-    HTTP_CODE=$(echo "$STATUS_RESPONSE" | tail -n1)
-
-    if [[ "$HTTP_CODE" -ne 200 ]]; then
-      echo "Error: Failed to get status from the server. HTTP Code: $HTTP_CODE"
-      echo "Response Body: $HTTP_BODY"
-      exit 1
-    fi
+      if [[ "$HTTP_CODE" -eq 200 ]]; then
+        break
+      else
+        if [[ $attempt -ge $max_retries ]]; then
+          echo "Error: Failed to get status from the server. HTTP Code: $last_http_code"
+          echo "Response Body: $last_http_body"
+          exit 1
+        fi
+        attempt=$((attempt+1))
+        sleep 2
+      fi
+    done
 
     STATUS=$(extract_string_value_from_json "$HTTP_BODY" 'status')
 
