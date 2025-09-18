@@ -67,6 +67,13 @@ validate_inputs() {
       validate_files "Signing" "$SIGNING_KEYSTORE"
       if [[ $GOOGLE_PLAY_SIGNING ]]; then
         validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+        if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]] && [[ -z "$SIGNING_FINGERPRINT" ]]; then
+           echo "Signing Fingerprint Upgrade provided without Signing Fingerprint. Exiting.."
+           exit 1
+        fi
+        if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
+          validate_args "Signing Fingerprint Upgrade" "$SIGNING_FINGERPRINT_UPGRADE"
+        fi
       fi
     fi
     ;;
@@ -115,6 +122,7 @@ help() {
   echo "-pr   |  --provisioning_profiles            Path to iOS provisioning profiles files to use. Can be multiple profiles"
   echo "-entt |  --entitlements                     Path to iOS entitlements plist to use. Can be multiple entitlements files"
   echo "-cf   |  --signing_fingerprint              SHA-1 or SHA-256 final Android signing certificate fingerprint"
+  echo "-cfu  |  --signing_fingerprint_upgrade      SHA-1 or SHA-256 Upgraded signing certificate fingerprint for Google Play App Signing"
   echo "-gp   |  --google_play_signing              This Android application will be distributed via the Google Play App Signing program"
   echo "-kp   |  --keystore_pass                    Password for keystore to use on Appdome iOS and Android signing"
   echo "-ka   |  --keystore_alias                   Key alias to use on Appdome Android signing"
@@ -227,6 +235,10 @@ parse_args() {
       SIGNING_FINGERPRINT="$2"
       shift 2
       ;;
+    -cfu | --signing_fingerprint_upgrade)
+      SIGNING_FINGERPRINT_UPGRADE="$2"
+      shift 2
+      ;;
     -gp | --google_play_signing)
       GOOGLE_PLAY_SIGNING=true
       shift 1
@@ -235,7 +247,6 @@ parse_args() {
       KEYSTORE_PASS="$2"
       shift 2
       ;;
-
     -baseline_profile | --baseline_profile)
       BASELINE_PROFILE="$2"
       shift 2

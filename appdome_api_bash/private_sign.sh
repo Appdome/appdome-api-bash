@@ -32,6 +32,10 @@ private_sign_android() {
   echo "Starting Android Private Signing"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
+    if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
+      add_sign_overrides "signing_keystore_google_signing_upgrade" "true"
+      add_sign_overrides "signing_keystore_google_signing_sha1_key_2nd_cert" "$SIGNING_FINGERPRINT_UPGRADE"
+    fi
   else
     add_sign_overrides "signing_sha1_fingerprint" "$SIGNING_FINGERPRINT"
   fi
