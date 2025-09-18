@@ -31,10 +31,14 @@ sign_ios() {
 
 sign_android() {
   local operation="Sign app"
-  
+
   echo "Starting Android Signing On Appdome"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
+    if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
+      add_sign_overrides "signing_keystore_google_signing_upgrade" "true"
+      add_sign_overrides "signing_keystore_google_signing_sha1_key_2nd_cert" "$SIGNING_FINGERPRINT_UPGRADE"
+    fi
   fi
   add_sign_overrides "signing_keystore_password" "$KEYSTORE_PASS"
   add_sign_overrides "signing_keystore_alias" "$KEYSTORE_ALIAS"
