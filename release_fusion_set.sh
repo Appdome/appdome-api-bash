@@ -51,7 +51,7 @@ SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
 assign_client_header
 
 release_fusion_set(){
-    local operation="Release fustion set"
+    local operation="Release fusion set"
     local URL="$SERVER_URL/api/v1/release_fs/$FUSION_SET_ID?team_id=$TEAM_ID"
 
     local request="curl -s --request POST \

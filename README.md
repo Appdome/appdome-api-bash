@@ -36,7 +36,8 @@ All APIs are documented in https://apis.appdome.com/docs.
 --deobfuscation_script_output <output deobfuscation script zip>
 --build_overrides <json_file_path> \
 --context_overrides <json_file_path> \
---sign_overrides <json_file_path>
+--sign_overrides <json_file_path> \
+--notification_email_override '["email1@example.com","email2@example.com"]' \
 --baseline_profile <zip file for build with baseline profile>
 --cert_pinning_zip <zip file containing dynamic certificates>
 ```
@@ -71,7 +72,8 @@ All APIs are documented in https://apis.appdome.com/docs.
 --certificate_output <output certificate pdf> \
 --build_overrides <json_file_path> \
 --context_overrides <json_file_path> \
---sign_overrides <json_file_path>
+--sign_overrides <json_file_path> \
+--notification_email_override '["email1@example.com","email2@example.com"]' \
 --cert_pinning_zip <zip file containing dynamic certificates>
 ```
 

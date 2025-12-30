@@ -172,3 +172,12 @@ init_certs_pinning() {
 
   echo "${certs[@]}"
 }
+
+parse_notification_form() {
+  local notification_form=""
+  if [[ -n "$NOTIFICATION_EMAIL_OVERRIDE" ]]; then
+    local notification_json="{\"emails\":$NOTIFICATION_EMAIL_OVERRIDE}"
+    notification_form=" --form 'notification_override=\"$(echo "$notification_json" | sed 's/"/\\\"/g')\"'"
+  fi
+  echo "$notification_form"
+}

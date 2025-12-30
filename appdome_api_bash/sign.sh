@@ -14,6 +14,7 @@ sign_ios() {
   fi
   local headers="$(request_headers)"
   local provisioning_profiles_entitlements=$(add_provisioning_profiles_entitlements)
+  local notification_form="$(parse_notification_form)"
   local request="curl -s --request POST \
                   --url '$SERVER_URL/api/v1/tasks?team_id=$TEAM_ID' \
                   $headers \
@@ -21,7 +22,8 @@ sign_ios() {
                   --form 'parent_task_id=$TASK_ID' \
                   --form 'signing_p12_content=@$SIGNING_KEYSTORE' \
                   $provisioning_profiles_entitlements \
-                  --form 'overrides=\"$(echo $SIGN_OVERRIDES | sed 's/"/\\\"/g')\"'"
+                  --form 'overrides=\"$(echo $SIGN_OVERRIDES | sed 's/"/\\\"/g')\"' \
+                  $notification_form"
   SIGN="$(eval $request)"
   validate_response_for_errors "$SIGN" $operation
   statusWaiter "$operation"
@@ -46,13 +48,15 @@ sign_android() {
   start_sign_time=$(date +%s)
 
   local headers="$(request_headers)"
+  local notification_form="$(parse_notification_form)"
   local request="curl -s --request POST \
                   --url '$SERVER_URL/api/v1/tasks?team_id=$TEAM_ID' \
                   $headers \
                   --form 'action=$SIGN_ACTION' \
                   --form 'parent_task_id=$TASK_ID' \
                   --form 'signing_keystore=@$SIGNING_KEYSTORE' \
-                  --form 'overrides=\"$(echo $SIGN_OVERRIDES | sed 's/"/\\\"/g')\"'"
+                  --form 'overrides=\"$(echo $SIGN_OVERRIDES | sed 's/"/\\\"/g')\"' \
+                  $notification_form"
 
   SIGN="$(eval $request)"
   validate_response_for_errors "$SIGN" $operation

@@ -11,10 +11,13 @@ direct_upload() {
   if [[ -n "$TEAM_ID" && "$TEAM_ID" != "personal" ]]; then
     url="${url}?team_id=${TEAM_ID}"
   fi
-  APP=$(curl -s -X POST "$url" \
-    --header "Authorization: $API_KEY" \
-    --header "X-Appdome-Client: $APPDOME_CLIENT_HEADER" \
-    -F "file=@${APP_LOCATION}")
+  notification_form="$(parse_notification_form)"
+  local request="curl -s -X POST \"$url\" \
+    --header \"Authorization: $API_KEY\" \
+    --header \"X-Appdome-Client: $APPDOME_CLIENT_HEADER\" \
+    -F \"file=@${APP_LOCATION}\" \
+    $notification_form"
+  APP="$(eval $request)"
   validate_response_for_errors "$APP" "$operation"
 
   printTime $((($(date +%s) - start_upload_time))) "Upload took: "
