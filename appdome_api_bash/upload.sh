@@ -21,15 +21,16 @@ upload_to_aws() {
 
 upload_using_link() {
   local operation="Upload app"
-  APP=$(
-    curl -s --request POST \
-      --url "$SERVER_URL/api/v1/upload-using-link?team_id=$TEAM_ID" \
-      --header "Authorization: $API_KEY" \
+  local notification_form="$(parse_notification_form)"
+  local request="curl -s --request POST \
+      --url \"$SERVER_URL/api/v1/upload-using-link?team_id=$TEAM_ID\" \
+      --header \"Authorization: $API_KEY\" \
       --header 'content-type: multipart/form-data' \
-      --header "X-Appdome-Client:$APPDOME_CLIENT_HEADER" \
-      --form file_name="$APP_FILE_NAME" \
-      --form file_app_id="$(extract_string_value_from_json "$publicLink" "file_id")"
-  )
+      --header \"X-Appdome-Client:$APPDOME_CLIENT_HEADER\" \
+      --form file_name=\"$APP_FILE_NAME\" \
+      --form file_app_id=\"$(extract_string_value_from_json "$publicLink" "file_id")\" \
+      $notification_form"
+  APP="$(eval $request)"
   validate_response_for_errors "$APP" $operation
 }
 

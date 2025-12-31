@@ -23,6 +23,7 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
     local operation="Build app to test"
   fi
   local headers="$(request_headers)"
+  local notification_form="$(parse_notification_form)"
   local request="curl -s --request POST \
                   --url "$URL" \
                   $headers \
@@ -39,6 +40,7 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
     certs=$(init_certs_pinning "$CERT_ZIP")
     request+=" $certs"
   fi
+  request+="$notification_form"
   TASK_ID="$(eval $request)"
   validate_response_for_errors "$TASK_ID" $operation
   TASK_ID=$(extract_string_value_from_json $TASK_ID "task_id")

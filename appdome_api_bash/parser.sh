@@ -86,6 +86,13 @@ validate_inputs() {
       WORKFLOW_OUTPUT_LOGS="$WORKFLOW_OUTPUT_LOGS/workflow.log"
     fi
   fi
+
+  if [[ -n "$NOTIFICATION_EMAIL_OVERRIDE" ]]; then
+    if [[ ! "$NOTIFICATION_EMAIL_OVERRIDE" =~ ^\[.*\]$ ]]; then
+      echo "notification_email_override must be a valid JSON array (e.g., [\"email@example.com\"]). Exiting.."
+      exit 1
+    fi
+  fi
 }
 
 help() {
@@ -111,6 +118,7 @@ help() {
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
   echo "-btv  |  --build_to_test_vendor             Enter vendor name on which Build to Test will happen (optional)"
   echo "-wol  |  --workflow_output_logs             Enter path to a workflow output logs file (optional)"
+  echo "-neo  |  --notification_email_override      JSON array of email addresses to override notification recipients (optional)"
   echo
   echo "please use one of the following signing options (one of the three is required)"
   echo "-s    |  --sign_on_appdome                  Sign on Appdome"
@@ -261,6 +269,10 @@ parse_args() {
       ;;
     -kyp | --key_pass)
       KEYS_PASS="$2"
+      shift 2
+      ;;
+    -neo | --notification_email_override)
+      NOTIFICATION_EMAIL_OVERRIDE="$2"
       shift 2
       ;;
     -h | --help)
