@@ -28,7 +28,7 @@ main() {
   start_all_process_time=$(date +%s)
   echo "Starting Appdome flow"
   echo ""
-
+ 
   if [[ "$DIRECT_UPLOAD" == "true" ]]; then
     echo "Uploading app directly to Appdome"
     direct_upload

@@ -13,6 +13,12 @@ validate_inputs() {
     exit 1
   fi
 
+  # Validate that signing_fingerprint_list is only used for Android
+  if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]] && [[ "$PLATFORM" == "IOS" ]]; then
+    echo "Error: --signing_fingerprint_list is only valid for Android applications"
+    exit 1
+  fi
+
   if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
     case $BUILD_TO_TEST in
       AUTOMATION_BITBAR|AUTOMATION_BROWSERSTACK|AUTOMATION_LAMBDATEST|AUTOMATION_SAUCELABS|AUTOMATION_PERFECTO|AUTOMATION_FIREBASE|AUTOMATION_KATALON|AUTOMATION_KOBITON|AUTOMATION_TOSCA|AUTOMATION_AWS_DEVICE_FARM)
@@ -48,14 +54,30 @@ validate_inputs() {
     if [[ $PLATFORM == IOS ]]; then
       validate_files "Provisioning profile" ${PROVISIONING_PROFILES[@]}
     else
-      validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+      # Validate mutual exclusivity of signing_fingerprint_list with signing fingerprint
+      if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
+        if [[ -n "$SIGNING_FINGERPRINT" || -n "$SIGNING_FINGERPRINT_UPGRADE" || -n "$GOOGLE_PLAY_SIGNING" ]]; then
+          echo "Error: --signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
+          exit 1
+        fi
+      else
+        validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+      fi
     fi
     ;;
   "$AUTO_DEV_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
       validate_files "Signing" ${PROVISIONING_PROFILES[@]} ${ENTITLEMENTS[@]}
     else
-      validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+      # Validate mutual exclusivity of signing_fingerprint_list with signing fingerprint
+      if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
+        if [[ -n "$SIGNING_FINGERPRINT" || -n "$SIGNING_FINGERPRINT_UPGRADE" || -n "$GOOGLE_PLAY_SIGNING" ]]; then
+          echo "Error: --signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
+          exit 1
+        fi
+      else
+        validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+      fi
     fi
     ;;
   "$SIGN_ACTION")
@@ -73,6 +95,13 @@ validate_inputs() {
         fi
         if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
           validate_args "Signing Fingerprint Upgrade" "$SIGNING_FINGERPRINT_UPGRADE"
+        fi
+      fi
+      # Validate mutual exclusivity of signing_fingerprint_list with Google Play signing options
+      if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
+        if [[ -n "$GOOGLE_PLAY_SIGNING" || -n "$SIGNING_FINGERPRINT" || -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
+          echo "Error: --signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
+          exit 1
         fi
       fi
     fi
@@ -123,6 +152,7 @@ help() {
   echo "-entt |  --entitlements                     Path to iOS entitlements plist to use. Can be multiple entitlements files"
   echo "-cf   |  --signing_fingerprint              SHA-1 or SHA-256 final Android signing certificate fingerprint"
   echo "-cfu  |  --signing_fingerprint_upgrade      SHA-1 or SHA-256 Upgraded signing certificate fingerprint for Google Play App Signing"
+  echo "-sfp  |  --signing_fingerprint_list         Path to JSON file with trusted signing fingerprints list (mutually exclusive with -gp, -cf, -cfu)"
   echo "-gp   |  --google_play_signing              This Android application will be distributed via the Google Play App Signing program"
   echo "-kp   |  --keystore_pass                    Password for keystore to use on Appdome iOS and Android signing"
   echo "-ka   |  --keystore_alias                   Key alias to use on Appdome Android signing"
@@ -237,6 +267,15 @@ parse_args() {
       ;;
     -cfu | --signing_fingerprint_upgrade)
       SIGNING_FINGERPRINT_UPGRADE="$2"
+      shift 2
+      ;;
+    -sfp | --signing_fingerprint_list)
+      if [[ ! -f "$2" ]]; then
+        echo "Trusted signing fingerprints file does not exist: $2"
+        exit 1
+      fi
+      TRUSTED_SIGNING_FINGERPRINTS_FILE="$2"
+      TRUSTED_SIGNING_FINGERPRINTS=$(cat "$2")
       shift 2
       ;;
     -gp | --google_play_signing)
