@@ -55,7 +55,7 @@ PLATFORM=''
 APP_FILE_NAME="$(basename -- "$APP_LOCATION")"
 
 assign_client_header
- 
+
 
 validation_upload(){
     local operation="Upload app to validate"

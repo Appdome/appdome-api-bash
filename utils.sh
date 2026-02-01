@@ -118,7 +118,6 @@ add_build_overrides() {
     BUILD_OVERRIDES="$BUILD_OVERRIDES, \"$1\":\"$2\"}" # Add new key value
   fi
 }
-
 init_certs_pinning() {
   local cert_pinning_zip="$1"
   local certs=()
@@ -171,4 +170,23 @@ init_certs_pinning() {
   done < <(grep -Eo '"[^"]+"\s*:\s*"[^"]+"' "$json_file")
 
   echo "${certs[@]}"
+}
+
+add_trusted_signing_fingerprints_to_overrides() {
+  local json_content="$1"
+  if [[ -z "$json_content" ]]; then
+    return
+  fi
+
+  # Escape the JSON for embedding in SIGN_OVERRIDES
+  # Remove newlines and extra whitespace, keeping the JSON structure intact
+  local escaped_json=$(echo "$json_content" | tr -d '\n' | tr -d '\t' | sed 's/  */ /g')
+
+  if [[ $SIGN_OVERRIDES == "{}" ]]; then
+    SIGN_OVERRIDES="{\"trusted_signing_fingerprint_list\":$escaped_json}"
+  else
+    SIGN_OVERRIDES=${SIGN_OVERRIDES%?} # Remove last char '}'
+    SIGN_OVERRIDES="$(echo "${SIGN_OVERRIDES%%[[:space:]]}")" # Remove white spacing
+    SIGN_OVERRIDES="$SIGN_OVERRIDES, \"trusted_signing_fingerprint_list\":$escaped_json}" # Add new key value
+  fi
 }

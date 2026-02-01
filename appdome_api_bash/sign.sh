@@ -40,6 +40,10 @@ sign_android() {
       add_sign_overrides "signing_keystore_google_signing_sha1_key_2nd_cert" "$SIGNING_FINGERPRINT_UPGRADE"
     fi
   fi
+  # Add trusted signing fingerprints if provided
+  if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS" ]]; then
+    add_trusted_signing_fingerprints_to_overrides "$TRUSTED_SIGNING_FINGERPRINTS"
+  fi
   add_sign_overrides "signing_keystore_password" "$KEYSTORE_PASS"
   add_sign_overrides "signing_keystore_alias" "$KEYSTORE_ALIAS"
   add_sign_overrides "signing_keystore_key_password" "$KEYS_PASS"

@@ -36,8 +36,12 @@ private_sign_android() {
       add_sign_overrides "signing_keystore_google_signing_upgrade" "true"
       add_sign_overrides "signing_keystore_google_signing_sha1_key_2nd_cert" "$SIGNING_FINGERPRINT_UPGRADE"
     fi
-  else
+  elif [[ -n "$SIGNING_FINGERPRINT" ]]; then
     add_sign_overrides "signing_sha1_fingerprint" "$SIGNING_FINGERPRINT"
+  fi
+  # Add trusted signing fingerprints if provided
+  if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS" ]]; then
+    add_trusted_signing_fingerprints_to_overrides "$TRUSTED_SIGNING_FINGERPRINTS"
   fi
   start_sign_time=$(date +%s)
 
