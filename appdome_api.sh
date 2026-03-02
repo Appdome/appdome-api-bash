@@ -27,7 +27,6 @@ CONTEXT_OVERRIDES="{}"
 SIGN_OVERRIDES="{}"
 
 
-
 assign_client_header
 
 main() {

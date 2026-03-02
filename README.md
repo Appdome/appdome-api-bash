@@ -38,6 +38,7 @@ All APIs are documented in https://apis.appdome.com/docs.
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
 --baseline_profile <zip file for build with baseline profile>
+--input_mapping <txt file for build with input obfuscation/minimization mapping>
 --cert_pinning_zip <zip file containing dynamic certificates>
 --google_play_signing <This Android application will be distributed via the Google Play App Signing program>
 --signing_fingerprint <SHA-1 or SHA-256 final Android signing certificate fingerprint>
@@ -95,9 +96,15 @@ All APIs are documented in https://apis.appdome.com/docs.
 
 ## Signing Fingerprint List (Android only)
 
-The `--signing_fingerprint_list` (or `-sfp`) option allows you to specify a list of signing fingerprints for Android signing. This is useful when you need to support multiple signing certificates.
+The `--signing_fingerprint_list` option allows you to specify a list of trusted signing fingerprints for Android applications. This is useful when you need to trust multiple signing certificates.
 
-**Usage:**
+**Important Notes:**
+- This option is **only valid for Android applications** (APK/AAB files)
+- It is **mutually exclusive** with `--google_play_signing`, `--signing_fingerprint`, and `--signing_fingerprint_upgrade`
+- You cannot use `--signing_fingerprint_list` together with any of the other signing fingerprint options
+
+### Usage
+
 ```bash
 --signing_fingerprint_list <path_to_json_file>
 ```
@@ -125,12 +132,8 @@ The JSON file should contain an array of fingerprint objects. Each object must i
 ]
 ```
 
-**Important Notes:**
-- The `--signing_fingerprint_list` option cannot be used together with:
-  - `--signing_fingerprint` (`-cf`)
-  - `--signing_fingerprint_upgrade` (`-cfu`)
-  - `--google_play_signing` (`-gp`)
-- This option is available for Android signing operations.
+**Fields:**
+- `SHA`: The SHA-1 or SHA-256 fingerprint of the signing certificate (required)
 
 
 # Update Certificate Pinning

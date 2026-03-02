@@ -32,6 +32,9 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
   if [[ -n "$BASELINE_PROFILE" && -f "$BASELINE_PROFILE" ]]; then
     request+=" --form baseline_profile=@\"$BASELINE_PROFILE\""
   fi
+  if [[ -n "$INPUT_MAPPING" && -f "$INPUT_MAPPING" ]]; then
+    request+=" --form input_mapping=@\"$INPUT_MAPPING\""
+  fi
   # Add overrides
   request+=" --form overrides='$(echo "$BUILD_OVERRIDES")'"
   # Add certificate pinning files if provided
