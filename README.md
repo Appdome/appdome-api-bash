@@ -32,17 +32,16 @@ All APIs are documented in https://apis.appdome.com/docs.
 --keystore_alias <key alias> \
 --key_pass <key password> \
 --output <output apk/aab> \
+--build_to_test_vendor <bitbar,saucelabs,browserstack,lambdatest,perfecto,firebase,aws_device_farm,app_debug,app_profiler> \
 --certificate_output <output certificate pdf> \
---deobfuscation_script_output <output deobfuscation script zip>
+--deobfuscation_script_output <file path for downloading deobfuscation zip file> \
 --build_overrides <json_file_path> \
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
 --baseline_profile <zip file for build with baseline profile>
 --input_mapping <txt file for build with input obfuscation/minimization mapping>
 --cert_pinning_zip <zip file containing dynamic certificates>
---google_play_signing <This Android application will be distributed via the Google Play App Signing program>
---signing_fingerprint <SHA-1 or SHA-256 final Android signing certificate fingerprint>
---signing_fingerprint_upgrade <SHA-1 or SHA-256 Upgraded signing certificate fingerprint for Google Play App Signing>
+--signing_fingerprint_list <path_to_json_file> \
 ```
 
 #### Android SDK Example:
@@ -87,8 +86,8 @@ All APIs are documented in https://apis.appdome.com/docs.
 --fusion_set_id <fusion-set-id> \
 --team_id <team-id> \
 --app <zip file> \
---keystore <keystore file> \ # only needed for sign on Appdome
---keystore_pass <keystore password> \ # only needed for sign on Appdome
+--keystore <p12 file> \  # only needed for sign on Appdome
+--keystore_pass <p12 password> \ # only needed for sign on Appdome
 --output <output zip> \
 --certificate_output <output certificate pdf> \
 --build_overrides <json_file_path> 
@@ -137,11 +136,8 @@ The JSON file should contain an array of fingerprint objects. Each object must i
 
 
 # Update Certificate Pinning
-
 To update certificate pinning, you need to bundle your certificates and mapping file into a ZIP archive and pass it to your build command.
-
 ## What to include
-
 - **Certificate files** (one per host), in any of these formats:  
   - `.cer`  
   - `.crt`  
