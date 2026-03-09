@@ -52,7 +52,7 @@ validate_inputs() {
   case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_files "Provisioning profile" ${PROVISIONING_PROFILES[@]}
+      validate_files "Provisioning profile" "${PROVISIONING_PROFILES[@]}"
     else
       # Validate mutual exclusivity of signing_fingerprint_list with signing fingerprint
       if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
@@ -67,7 +67,7 @@ validate_inputs() {
     ;;
   "$AUTO_DEV_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_files "Signing" ${PROVISIONING_PROFILES[@]} ${ENTITLEMENTS[@]}
+      validate_files "Signing" "${PROVISIONING_PROFILES[@]}" "${ENTITLEMENTS[@]}"
     else
       # Validate mutual exclusivity of signing_fingerprint_list with signing fingerprint
       if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
@@ -83,7 +83,7 @@ validate_inputs() {
   "$SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
       validate_args "Signing parameters" "$KEYSTORE_PASS"
-      validate_files "Signing" ${PROVISIONING_PROFILES[@]} "$SIGNING_KEYSTORE" ${ENTITLEMENTS[@]}
+      validate_files "Signing" "${PROVISIONING_PROFILES[@]}" "$SIGNING_KEYSTORE" "${ENTITLEMENTS[@]}"
     else
       validate_args "Signing parameters" "$KEYSTORE_PASS" "$KEYSTORE_ALIAS" "$KEYS_PASS"
       validate_files "Signing" "$SIGNING_KEYSTORE"
@@ -202,11 +202,11 @@ parse_args() {
       shift 2
       ;;
     -pr | --provisioning_profiles)
-      PROVISIONING_PROFILES=(${2//,/ })
+      IFS=',' read -r -a PROVISIONING_PROFILES <<< "$2"
       shift 2
       ;;
     -entt | --entitlements)
-      ENTITLEMENTS=(${2//,/ })
+      IFS=',' read -r -a ENTITLEMENTS <<< "$2"
       shift 2
       ;;
     -o | --output)
