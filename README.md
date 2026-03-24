@@ -39,6 +39,7 @@ All APIs are documented in https://apis.appdome.com/docs.
 --context_overrides <json_file_path> \
 --sign_overrides <json_file_path>
 --baseline_profile <zip file for build with baseline profile>
+--startup_profile <zip file for build with startup profile>
 --input_mapping <txt file for build with input obfuscation/minimization mapping>
 --cert_pinning_zip <zip file containing dynamic certificates>
 --signing_fingerprint_list <path_to_json_file> \

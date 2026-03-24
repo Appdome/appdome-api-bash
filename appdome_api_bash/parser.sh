@@ -133,6 +133,7 @@ help() {
   echo "-aid  |  --app_id                           App ID in Firebase project (optional)"
   echo "-dd_api_key | --datadog_api_key             Data Dog API_KEY (required for DataDog Deobfuscation) (optional)"
   echo "-baseline_profile | --baseline_profile      baseline profile file to use (optional)"
+  echo "-startup_profile | --startup_profile        startup profile file to use (optional)"
   echo "-input_mapping | --input_mapping            input mapping file to use (optional)"
   echo "-cert_zip | --cert_pinning_zip              Path to zip file containing dynamic certificates for certificate pinning (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
@@ -289,6 +290,10 @@ parse_args() {
       ;;
     -baseline_profile | --baseline_profile)
       BASELINE_PROFILE="$2"
+      shift 2
+      ;;
+    -startup_profile | --startup_profile)
+      STARTUP_PROFILE="$2"
       shift 2
       ;;
     -input_mapping | --input_mapping)

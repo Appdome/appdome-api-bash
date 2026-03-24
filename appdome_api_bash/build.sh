@@ -32,6 +32,9 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
   if [[ -n "$BASELINE_PROFILE" && -f "$BASELINE_PROFILE" ]]; then
     request+=" --form baseline_profile=@\"$BASELINE_PROFILE\""
   fi
+  if [[ -n "$STARTUP_PROFILE" && -f "$STARTUP_PROFILE" ]]; then
+    request+=" --form startup_profile=@\"$STARTUP_PROFILE\""
+  fi
   if [[ -n "$INPUT_MAPPING" && -f "$INPUT_MAPPING" ]]; then
     request+=" --form input_mapping=@\"$INPUT_MAPPING\""
   fi
