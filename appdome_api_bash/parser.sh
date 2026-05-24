@@ -4,19 +4,25 @@ AUTO_DEV_SIGN_ACTION='sign_script'
 SIGN_ACTION='sign'
 
 validate_inputs() {
+  reset_validation_errors
+
+  require_param "--app (-a) is required — path to .ipa, .apk, or .aab file" "$APP_LOCATION"
+  require_param "--api_key (-key) is required (or set APPDOME_API_KEY environment variable)" "$API_KEY"
+  require_param "--fusion_set_id (-fs) is required (or set APPDOME_IOS_FS_ID / APPDOME_ANDROID_FS_ID environment variable)" "$FUSION_SET_ID"
+  require_param "One signing method is required: --sign_on_appdome (-s), --private_signing (-ps), or --auto_dev_private_signing (-adps)" "$SIGN_METHOD"
+  require_param "--output (-o) is required — output path for the fused and signed app" "$FINAL_OUTPUT_LOCATION"
+  flush_validation_errors
+
   if [[ "$APP_LOCATION" == *".ipa" ]]; then
     PLATFORM=IOS
   elif [[ "$APP_LOCATION" == *".aab" || "$APP_LOCATION" == *".apk" ]]; then
     PLATFORM=ANDROID
   else
-    echo "No application provided. Exiting.."
-    exit 1
+    log_and_exit "App extension must be .ipa, .apk, or .aab (got: $APP_LOCATION)"
   fi
 
-  # Validate that signing_fingerprint_list is only used for Android
   if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]] && [[ "$PLATFORM" == "IOS" ]]; then
-    echo "Error: --signing_fingerprint_list is only valid for Android applications"
-    exit 1
+    log_and_exit "--signing_fingerprint_list is only valid for Android applications"
   fi
 
   if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
@@ -24,8 +30,7 @@ validate_inputs() {
       AUTOMATION_BITBAR|AUTOMATION_BROWSERSTACK|AUTOMATION_LAMBDATEST|AUTOMATION_SAUCELABS|AUTOMATION_PERFECTO|AUTOMATION_FIREBASE|AUTOMATION_KATALON|AUTOMATION_KOBITON|AUTOMATION_TOSCA|AUTOMATION_AWS_DEVICE_FARM)
         ;;
       *)
-        echo "Vendor name provided for Build To Test isn't one of the acceptable vendors: $BUILD_TO_TEST"
-        exit 1  # Exit the script with a non-zero status code
+        log_and_exit "Vendor name provided for Build To Test isn't one of the acceptable vendors: $BUILD_TO_TEST"
         ;;
     esac
   fi
@@ -36,80 +41,71 @@ validate_inputs() {
     elif [[ -z "$PROVISIONING_PROFILES" ]] && [[ -n "$SIGNING_FINGERPRINT" || -n "$KEYSTORE_ALIAS" ]]; then
       PLATFORM=ANDROID
     else
-      echo "Missing signing inputs. Exiting.."
-      exit 1
+      log_and_exit "Please specify the correct platform signing credentials (provisioning profiles for iOS, or signing fingerprint / keystore alias for Android)"
     fi
   fi
-
-  # validate fusion set arguments
-  validate_args "fusion-set-id" "$FUSION_SET_ID"
-
-  # validate api key arguments
-  validate_args "API key" "$API_KEY"
-
-  # validate sign arguments
-  validate_args "Sign method" "$SIGN_METHOD"
   case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
+      if [[ ${#PROVISIONING_PROFILES[@]} -eq 0 ]] || [[ -z "${PROVISIONING_PROFILES[0]}" ]]; then
+        log_and_exit "--provisioning_profiles (-pr) is required for iOS private signing"
+      fi
       validate_files "Provisioning profile" "${PROVISIONING_PROFILES[@]}"
     else
       # Validate mutual exclusivity of signing_fingerprint_list with signing fingerprint
       if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
         if [[ -n "$SIGNING_FINGERPRINT" || -n "$SIGNING_FINGERPRINT_UPGRADE" || -n "$GOOGLE_PLAY_SIGNING" ]]; then
-          echo "Error: --signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
-          exit 1
+          log_and_exit "--signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
         fi
       else
-        validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+        require_param "--signing_fingerprint (-cf) is required for Android private signing (or use --signing_fingerprint_list)" "$SIGNING_FINGERPRINT"
+        flush_validation_errors
       fi
     fi
     ;;
   "$AUTO_DEV_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_files "Signing" "${PROVISIONING_PROFILES[@]}" "${ENTITLEMENTS[@]}"
+      validate_files "Provisioning profile" "${PROVISIONING_PROFILES[@]}"
+      validate_files "Entitlements" "${ENTITLEMENTS[@]}"
     else
-      # Validate mutual exclusivity of signing_fingerprint_list with signing fingerprint
       if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
         if [[ -n "$SIGNING_FINGERPRINT" || -n "$SIGNING_FINGERPRINT_UPGRADE" || -n "$GOOGLE_PLAY_SIGNING" ]]; then
-          echo "Error: --signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
-          exit 1
+          log_and_exit "--signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
         fi
       else
-        validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+        require_param "--signing_fingerprint (-cf) is required for Android auto-dev signing (or use --signing_fingerprint_list)" "$SIGNING_FINGERPRINT"
+        flush_validation_errors
       fi
     fi
     ;;
   "$SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then
-      validate_args "Signing parameters" "$KEYSTORE_PASS"
-      validate_files "Signing" "${PROVISIONING_PROFILES[@]}" "$SIGNING_KEYSTORE" "${ENTITLEMENTS[@]}"
+      require_param "--keystore_pass (-kp) is required for iOS on-Appdome signing" "$KEYSTORE_PASS"
+      flush_validation_errors
+      validate_files "Provisioning profile" "${PROVISIONING_PROFILES[@]}"
+      validate_files "Keystore" "$SIGNING_KEYSTORE"
+      validate_files "Entitlements" "${ENTITLEMENTS[@]}"
     else
-      validate_args "Signing parameters" "$KEYSTORE_PASS" "$KEYSTORE_ALIAS" "$KEYS_PASS"
-      validate_files "Signing" "$SIGNING_KEYSTORE"
+      require_param "--keystore_pass (-kp) is required for Android on-Appdome signing" "$KEYSTORE_PASS"
+      require_param "--keystore_alias (-ka) is required for Android on-Appdome signing" "$KEYSTORE_ALIAS"
+      require_param "--key_pass (-kyp) is required for Android on-Appdome signing" "$KEYS_PASS"
+      flush_validation_errors
+      validate_files "Keystore" "$SIGNING_KEYSTORE"
       if [[ $GOOGLE_PLAY_SIGNING ]]; then
-        validate_args "Signing Fingerprint" "$SIGNING_FINGERPRINT"
+        require_param "--signing_fingerprint (-cf) is required when using --google_play_signing" "$SIGNING_FINGERPRINT"
+        flush_validation_errors
         if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]] && [[ -z "$SIGNING_FINGERPRINT" ]]; then
-           echo "Signing Fingerprint Upgrade provided without Signing Fingerprint. Exiting.."
-           exit 1
-        fi
-        if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
-          validate_args "Signing Fingerprint Upgrade" "$SIGNING_FINGERPRINT_UPGRADE"
+          log_and_exit "Base Google signing fingerprint (--signing_fingerprint) is required to use --signing_fingerprint_upgrade"
         fi
       fi
-      # Validate mutual exclusivity of signing_fingerprint_list with Google Play signing options
       if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]]; then
         if [[ -n "$GOOGLE_PLAY_SIGNING" || -n "$SIGNING_FINGERPRINT" || -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then
-          echo "Error: --signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
-          exit 1
+          log_and_exit "--signing_fingerprint_list cannot be used with --google_play_signing, --signing_fingerprint, or --signing_fingerprint_upgrade"
         fi
       fi
     fi
     ;;
   esac
-
-  # validate api key arguments
-  validate_args "Final Output Location" "$FINAL_OUTPUT_LOCATION"
   if [[ -n "$WORKFLOW_OUTPUT_LOGS" ]]; then
     if [[ -d "$WORKFLOW_OUTPUT_LOGS" ]]; then
       WORKFLOW_OUTPUT_LOGS="$WORKFLOW_OUTPUT_LOGS/workflow.log"
@@ -142,6 +138,7 @@ help() {
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
   echo "-btv  |  --build_to_test_vendor             Enter vendor name on which Build to Test will happen (optional)"
   echo "-wol  |  --workflow_output_logs             Enter path to a workflow output logs file (optional)"
+  echo "-v    |  --verbose                          Show debug logs (request URLs, validation details)"
   echo
   echo "please use one of the following signing options (one of the three is required)"
   echo "-s    |  --sign_on_appdome                  Sign on Appdome"
@@ -163,7 +160,8 @@ help() {
 }
 
 parse_args() {
-  while true; do
+  local UNKNOWN_ARGS=()
+  while [[ $# -gt 0 ]]; do
     case "$1" in
     -key | --api_key)
       API_KEY="$2"
@@ -273,8 +271,7 @@ parse_args() {
       ;;
     -sfp | --signing_fingerprint_list)
       if [[ ! -f "$2" ]]; then
-        echo "Trusted signing fingerprints file does not exist: $2"
-        exit 1
+        log_and_exit "Trusted signing fingerprints file does not exist: $2"
       fi
       TRUSTED_SIGNING_FINGERPRINTS_FILE="$2"
       TRUSTED_SIGNING_FINGERPRINTS=$(cat "$2")
@@ -312,14 +309,31 @@ parse_args() {
       KEYS_PASS="$2"
       shift 2
       ;;
+    -v | --verbose)
+      VERBOSE=true
+      shift 1
+      ;;
     -h | --help)
       help
       exit
       ;;
-    -- | *)
-      break
+    -*)
+      UNKNOWN_ARGS+=("$1")
+      shift 1
+      if [[ $# -gt 0 && "$1" != -* ]]; then
+        log_debug "Skipping value for unknown option: $1"
+        shift 1
+      fi
+      ;;
+    *)
+      log_and_exit "Unexpected argument: $1"
       ;;
     esac
   done
+  if [[ ${#UNKNOWN_ARGS[@]} -gt 0 ]]; then
+    report_unknown_arguments "${UNKNOWN_ARGS[@]}"
+  fi
+  init_logging
+  log_debug "Parsed arguments: app=$APP_LOCATION fusion_set_id=$FUSION_SET_ID sign_method=$SIGN_METHOD output=$FINAL_OUTPUT_LOCATION"
   validate_inputs
 }

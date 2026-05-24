@@ -6,7 +6,7 @@ PRIVATE_SIGN_ACTION='seal'
 private_sign_ios() {
   local operation="Sign app"
 
-  echo "Starting iOS Private Signing"
+  log_info "Starting iOS Private Signing"
   start_sign_time=$(date +%s)
 
   local headers="$(request_headers)"
@@ -29,7 +29,7 @@ private_sign_ios() {
 private_sign_android() {
   local operation="Sign app"
   
-  echo "Starting Android Private Signing"
+  log_info "Starting Android Private Signing"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
     if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then

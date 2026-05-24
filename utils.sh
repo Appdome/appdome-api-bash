@@ -1,3 +1,145 @@
+VERBOSE="${VERBOSE:-false}"
+_LOG_LEVEL_INFO=1
+_LOG_LEVEL_DEBUG=2
+_CURRENT_LOG_LEVEL=$_LOG_LEVEL_INFO
+VALIDATION_ERRORS=()
+
+init_logging() {
+  if [[ "$VERBOSE" == "true" ]]; then
+    _CURRENT_LOG_LEVEL=$_LOG_LEVEL_DEBUG
+  else
+    _CURRENT_LOG_LEVEL=$_LOG_LEVEL_INFO
+  fi
+}
+
+_log() {
+  local level="$1"
+  local level_num="$2"
+  shift 2
+  if (( level_num > _CURRENT_LOG_LEVEL )); then
+    return
+  fi
+  local timestamp
+  timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+  local caller="${BASH_SOURCE[2]##*/}:${BASH_LINENO[1]}"
+  echo "[$timestamp] [$level] [$caller] $*" >&2
+}
+
+log_info() { _log "INFO" $_LOG_LEVEL_INFO "$@"; }
+log_debug() { _log "DEBUG" $_LOG_LEVEL_DEBUG "$@"; }
+log_warn() { _log "WARNING" $_LOG_LEVEL_INFO "$@"; }
+log_error() { _log "ERROR" $_LOG_LEVEL_INFO "$@"; }
+
+log_and_exit() {
+  log_error "$@"
+  exit 1
+}
+
+debug_log_request() {
+  local request_type="${1:-post}"
+  shift
+  local url="$1"
+  shift
+  local extra=""
+  while [[ $# -gt 0 ]]; do
+    extra+=" $1"
+    shift
+  done
+  log_debug "About to ${request_type} ${url}${extra}"
+}
+
+_truncate_value() {
+  local value="$1"
+  local max_len="${2:-500}"
+  if [[ ${#value} -gt $max_len ]]; then
+    echo "${value:0:max_len} ...'"
+  else
+    echo "$value"
+  fi
+}
+
+require_param() {
+  local message="$1"
+  local value="$2"
+  if [[ -z "$value" ]]; then
+    VALIDATION_ERRORS+=("$message")
+  fi
+}
+
+flush_validation_errors() {
+  if [[ ${#VALIDATION_ERRORS[@]} -eq 0 ]]; then
+    return
+  fi
+  log_error "Validation failed:"
+  for err in "${VALIDATION_ERRORS[@]}"; do
+    log_error "  - $err"
+  done
+  log_error "Run with --help for usage information."
+  exit 1
+}
+
+reset_validation_errors() {
+  VALIDATION_ERRORS=()
+}
+
+# Long option names (without leading dashes) for typo suggestions
+APPDOME_API_KNOWN_OPTIONS=(
+  api_key team_id fusion_set_id direct_upload app
+  sign_on_appdome private_signing auto_dev_private_signing
+  keystore provisioning_profiles entitlements output
+  certificate_output certificate_json workflow_output_logs
+  deobfuscation_script_output app_id datadog_api_key
+  build_overrides build_logs second_output build_to_test_vendor
+  context_overrides sign_overrides signing_fingerprint
+  signing_fingerprint_upgrade signing_fingerprint_list google_play_signing
+  keystore_pass baseline_profile startup_profile input_mapping
+  cert_pinning_zip keystore_alias key_pass verbose help
+)
+
+_normalize_option_name() {
+  local name="$1"
+  name="${name#-}"
+  name="${name#-}"
+  echo "$name"
+}
+
+suggest_similar_option() {
+  local unknown="$1"
+  local name
+  name=$(_normalize_option_name "$unknown")
+
+  for opt in "${APPDOME_API_KNOWN_OPTIONS[@]}"; do
+    if [[ "$opt" == "$name" ]]; then
+      return 0
+    fi
+    local diff=$(( ${#opt} - ${#name} ))
+    if [[ $diff -ge 1 && $diff -le 3 && "${opt:0:${#name}}" == "$name" ]]; then
+      echo "--$opt"
+      return 0
+    fi
+    if [[ $diff -ge 1 && $diff -le 3 && "${name:0:${#opt}}" == "$opt" ]]; then
+      echo "--$opt"
+      return 0
+    fi
+  done
+}
+
+report_unknown_arguments() {
+  local -a unknown=("$@")
+  log_error "Unknown argument(s):"
+  for arg in "${unknown[@]}"; do
+    local suggestion
+    suggestion=$(suggest_similar_option "$arg")
+    if [[ -n "$suggestion" ]]; then
+      log_error "  - $arg (did you mean $suggestion?)"
+    else
+      log_error "  - $arg"
+    fi
+  done
+  log_error "Run with --help for the list of valid options."
+  exit 1
+}
+
 add_google_play_signing_fingerprint() {
   add_sign_overrides "signing_keystore_use_google_signing" "true"
   add_sign_overrides "signing_keystore_google_signing_sha1_key" "$SIGNING_FINGERPRINT"
@@ -12,37 +154,49 @@ assign_client_header() {
 }
 
 validate_args() {
-  args=("$@")
-  for ((i = 1; i < $#; i++)); do
-    if [[ -z "${args[i]}" ]]; then
-      echo "Missing $1 arguments. Exiting.."
-      exit 1
+  local param_name="$1"
+  shift
+  local missing=()
+  for value in "$@"; do
+    if [[ -z "$value" ]]; then
+      missing+=("$param_name")
     fi
   done
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    if [[ ${#missing[@]} -eq 1 ]]; then
+      log_and_exit "Missing required parameter: $param_name"
+    else
+      log_and_exit "Missing required parameters: $param_name (${#missing[@]} values required)"
+    fi
+  fi
 }
 
 validate_files() {
-  args=("$@")
-  for ((i = 1; i < $#; i++)); do
-    if [[ ! -f "${args[i]}" ]]; then
-      echo "$1 file: ${args[i]} does not exist."
-      exit 1
+  local label="$1"
+  shift
+  for file_path in "$@"; do
+    if [[ -z "$file_path" ]]; then
+      continue
     fi
+    if [[ ! -f "$file_path" ]]; then
+      log_and_exit "$label file does not exist: $file_path"
+    fi
+    log_debug "$label file validated: $file_path"
   done
 }
 
 validate_response_for_errors() {
   if [[ "$1" == *"error"* ]]; then
-    echo "$2 failed. Error: $1"
-    exit 1
+    log_and_exit "$2 failed. Response: $(_truncate_value "$1")"
   fi
 }
 
 validate_response_code() {
   if [[ "$1" != "200" ]]; then
-    echo "$2 failed. Error: $(cat $3)"
-    rm $3
-    exit 1
+    local response_body
+    response_body=$(cat "$3")
+    log_and_exit "$2 failed. Status code: $1. Response: $(_truncate_value "$response_body")"
+    rm -f "$3"
   fi
 }
 

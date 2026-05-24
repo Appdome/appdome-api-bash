@@ -2,7 +2,7 @@
 
 upload_deobfuscation_mapping_to_crashlytics() {
     skip=false
-    
+
     if [[ -z $APP_ID ]]; then
         echo "WARNING: Missing Firebase project app ID. Skipping code deobfuscation mapping file uploading to Crashlytics."
         skip=true	

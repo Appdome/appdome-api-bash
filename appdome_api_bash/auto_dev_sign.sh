@@ -7,7 +7,7 @@ AUTO_DEV_SIGN_ACTION='sign_script'
 auto_sign_ios() {
   local operation="Sign app"
   
-  echo "Starting iOS Auto-DEV Private Signing"
+  log_info "Starting iOS Auto-DEV Private Signing"
   start_sign_time=$(date +%s)
   if [ ${#ENTITLEMENTS[@]} -gt 0 ]; then
     add_sign_overrides "manual_entitlements_matching" "true"
@@ -32,7 +32,7 @@ auto_sign_ios() {
 auto_sign_android() {
   local operation="Sign app"
 
-  echo "Starting Android Auto-DEV Private Signing"
+  log_info "Starting Android Auto-DEV Private Signing"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
     if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then

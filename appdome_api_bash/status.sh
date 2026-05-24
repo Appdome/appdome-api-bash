@@ -2,7 +2,7 @@
 source ./utils.sh
 
 statusWaiter() {
-  echo ""
+  log_info "Waiting for task to complete: $1"
   STATUS="progress"
   local lastDate="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"  # Ensure URL-safe date formatting
   local operation="$1"
@@ -48,10 +48,9 @@ statusWaiter() {
         break
       else
         if [[ $attempt -ge $max_retries ]]; then
-          echo "Error: Failed to get status from the server. HTTP Code: $last_http_code"
-          echo "Response Body: $last_http_body"
-          exit 1
+          log_and_exit "Failed to get status from the server after $max_retries attempts. HTTP Code: $last_http_code. Response: $(_truncate_value "$last_http_body")"
         fi
+        log_debug "Status request failed (HTTP $HTTP_CODE), retry $attempt/$max_retries"
         attempt=$((attempt+1))
         sleep 2
       fi
@@ -63,7 +62,7 @@ statusWaiter() {
       local messages_exist=$(echo "$HTTP_BODY" | grep -o '"messages":\[\]')
       if [[ "$messages_exist" != '"messages":[]' ]]; then
         echo "$HTTP_BODY" | grep -o '"text":"[^"]*' | cut -d'"' -f4 | while read -r message_text; do
-          echo " - $message_text"
+          log_info " - $message_text"
           if [[ -n "$file_path" ]]; then
             echo " - $message_text" >> "$file_path"
           fi
@@ -81,12 +80,10 @@ statusWaiter() {
   done
 
   if [[ "$STATUS" != "completed" ]]; then
-    echo "$operation failed"
     local reason=$(extract_string_value_from_json "$HTTP_BODY" 'message')
-    echo "Reason: $reason"
-    exit 1
+    log_and_exit "$operation failed. Reason: $reason"
   else
-    echo "$operation done"
+    log_info "$operation done"
     if [[ -n "$file_path" ]]; then
       echo "Done $operation" >> "$file_path"
       echo "" >> "$file_path"

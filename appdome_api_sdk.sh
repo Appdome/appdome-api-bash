@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source ./utils.sh
 source ./appdome_api_bash/parser_sdk.sh
 source ./appdome_api_bash/upload.sh
 source ./appdome_api_bash/direct_upload.sh
@@ -26,11 +27,10 @@ assign_client_header
 main() {
   parse_args "$@"
   start_all_process_time=$(date +%s)
-  echo "Starting Appdome flow"
-  echo ""
+  log_info "Starting Appdome flow"
  
   if [[ "$DIRECT_UPLOAD" == "true" ]]; then
-    echo "Uploading app directly to Appdome"
+    log_info "Uploading app directly to Appdome"
     direct_upload
   else
     upload

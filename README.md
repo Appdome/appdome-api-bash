@@ -2,8 +2,14 @@
 Bash client library for interacting with https://fusion.appdome.com/ tasks API.
 
 `appdome_api.sh` contains the whole flow of a task from upload to download.
-
+ 
 All APIs are documented in https://apis.appdome.com/docs.
+
+## Debugging
+
+Use `--verbose` / `-v` to enable debug logging (request URLs, parsed arguments, validation details). Logs are written to stderr with timestamps, matching the Python client format.
+
+When required arguments are missing, the script reports each one with the flag name (e.g. `--output (-o) is required`) instead of a generic message.
 
 ## Requirements
 - curl

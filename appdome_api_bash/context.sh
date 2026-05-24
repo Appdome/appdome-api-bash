@@ -5,7 +5,7 @@ source ./utils.sh
 context() {
   local operation="Context"
   
-  echo "Starting Context"
+  log_info "Starting Context"
   start_context_time=$(date +%s)
 
   local headers="$(request_headers)"

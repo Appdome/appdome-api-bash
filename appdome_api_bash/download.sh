@@ -23,9 +23,8 @@ download_deobfuscation_script() {
     rm -f "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION"
   else
     validate_response_code "$DOWNLOAD" "$operation" $DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION
-    echo "Starting $operation"
+    log_info "Starting $operation"
     printTime $((($(date +%s) - start_download_time))) "$operation took: "
-    echo ""
   fi
 }
 
@@ -48,13 +47,13 @@ download_second_output() {
 }
 
 download() {
-  echo "Starting $1"
+  log_info "Starting $1"
   start_download_time=$(date +%s)
 
   directory=$(dirname "$3")
   if [ ! -d "$directory" ]; then
     mkdir -p "$directory"
-    echo "Created missing directories: $directory"
+    log_info "Created missing directories: $directory"
   fi
 
   local headers="$(request_headers)"
@@ -62,9 +61,10 @@ download() {
                   $2 \
                   $headers \
                   -o '$3'"
+  debug_log_request get "$2" "output=$3"
   DOWNLOAD="$(eval $request)"
   validate_response_code "$DOWNLOAD" "$1" $3
 
-  printTime $((($(date +%s) - start_download_time))) "$1 took: " 
-  echo ""
+  log_info "Downloaded output file to $3"
+  printTime $((($(date +%s) - start_download_time))) "$1 took: "
 }

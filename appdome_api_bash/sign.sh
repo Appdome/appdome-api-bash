@@ -6,7 +6,7 @@ SIGN_ACTION='sign'
 
 sign_ios() {
   local operation="Sign app"
-  echo "Starting iOS Signing On Appdome"
+  log_info "Starting iOS Signing On Appdome"
   start_sign_time=$(date +%s)
   add_sign_overrides "signing_p12_password" "$KEYSTORE_PASS"
   if [ ${#ENTITLEMENTS[@]} -gt 0 ]; then
@@ -32,7 +32,7 @@ sign_ios() {
 sign_android() {
   local operation="Sign app"
 
-  echo "Starting Android Signing On Appdome"
+  log_info "Starting Android Signing On Appdome"
   if [[ -n "$GOOGLE_PLAY_SIGNING" ]]; then
     add_google_play_signing_fingerprint
     if [[ -n "$SIGNING_FINGERPRINT_UPGRADE" ]]; then

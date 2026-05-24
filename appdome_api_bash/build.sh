@@ -4,11 +4,10 @@ source ./utils.sh
 
 build() {
   local operation="Build app"
-  echo "Starting build"
+  log_info "Starting build"
   start_build_time=$(date +%s)
   if [[ -z "$APP" ]]; then
-    echo "invalid arguments - build"
-    exit 1
+    log_and_exit "Cannot build: app was not uploaded (APP is empty)"
   fi
 
   URL="$SERVER_URL/api/v1/tasks?team_id=$TEAM_ID"
@@ -45,11 +44,12 @@ if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
     certs=$(init_certs_pinning "$CERT_ZIP")
     request+=" $certs"
   fi
+  debug_log_request post "$URL" "action=fuse fusion_set_id=$FUSION_SET_ID"
   TASK_ID="$(eval $request)"
   validate_response_for_errors "$TASK_ID" $operation
   TASK_ID=$(extract_string_value_from_json $TASK_ID "task_id")
+  log_info "Build started. Task-id: $TASK_ID"
   statusWaiter $operation
   printTime $((($(date +%s) - start_build_time))) "Build took: "
-  echo "Task-id: $TASK_ID"
-  echo ""
+  log_info "Build request finished."
 }
