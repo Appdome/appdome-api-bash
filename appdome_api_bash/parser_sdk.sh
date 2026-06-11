@@ -43,6 +43,7 @@ help() {
   echo "-o    |  --output                           Output file for fused and signed SDK after Appdome (required)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
   echo "-cj   |  --certificate_json                 Output file for Certified Secure json (optional)"
+  echo "-dso  |  --deobfuscation_script_output      Output file deobfuscation scripts when building with obfuscation (optional)"
   echo "-bv   |  --build_overrides                  Path to json file with build overrides (optional)"
   echo "-bl   |  --build_logs                       Build with diagnostic logs (optional)"
   echo "-wol  |  --workflow_output_logs             Enter path to a workflow output logs file (optional)"
@@ -95,6 +96,10 @@ parse_args() {
       ;;
     -cj | --certificate_json)
       CERTIFICATE_JSON_OUTPUT_LOCATION=$2
+      shift 2
+      ;;
+    -dso | --deobfuscation_script_output)
+      DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION=$2
       shift 2
       ;;
     -bv | --build_overrides)

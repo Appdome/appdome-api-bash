@@ -61,6 +61,7 @@ When required arguments are missing, the script reports each one with the flag n
 --app <aar> \
 --output <output aar> \
 --certificate_output <output certificate pdf> \
+--deobfuscation_script_output <file path for downloading deobfuscation zip file> \
 --build_overrides <json_file_path> 
 ```
 
@@ -97,6 +98,7 @@ When required arguments are missing, the script reports each one with the flag n
 --keystore_pass <p12 password> \ # only needed for sign on Appdome
 --output <output zip> \
 --certificate_output <output certificate pdf> \
+--deobfuscation_script_output <file path for downloading deobfuscation zip file> \
 --build_overrides <json_file_path> 
 ```
 
