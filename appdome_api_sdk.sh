@@ -54,6 +54,10 @@ main() {
     download_certified_secure_json_test
   fi
 
+  if statusForObfuscation && [[ -n "$DEOBFUSCATION_SCRIPT_OUTPUT_LOCATION" ]]; then
+    download_deobfuscation_script
+  fi
+
   printTime $((($(date +%s) - start_all_process_time))) "Appdome API took: "
 }
 
