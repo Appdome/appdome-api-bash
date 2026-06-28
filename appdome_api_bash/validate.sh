@@ -48,8 +48,8 @@ parse_args() {
   validate_inputs
 }
 
-SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
-API_KEY="${API_KEY_ENV:-}"
+init_server_url
+API_KEY="${APPDOME_API_KEY:-${API_KEY_ENV:-}}"
 APP_LOCATION=''
 PLATFORM=''
 APP_FILE_NAME="$(basename -- "$APP_LOCATION")"

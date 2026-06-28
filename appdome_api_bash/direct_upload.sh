@@ -1,11 +1,19 @@
 #!/bin/bash
 source ./utils.sh
+source ./appdome_api_bash/check_by_checksum.sh
 
 direct_upload() {
   operation="Direct upload"
 
   log_info "Starting direct upload"
   start_upload_time=$(date +%s)
+
+  if try_use_existing_app_by_checksum; then
+    printTime $((($(date +%s) - start_upload_time))) "Upload took: "
+    log_info "Upload done. App-id: $(extract_string_value_from_json "$APP" "id")"
+    return
+  fi
+
   local url="$SERVER_URL/api/v1/upload"
   if [[ -n "$TEAM_ID" && "$TEAM_ID" != "personal" ]]; then
     url="${url}?team_id=${TEAM_ID}"

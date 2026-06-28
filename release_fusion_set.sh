@@ -46,7 +46,7 @@ parse_args() {
   validate_inputs
 }
 
-SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
+init_server_url
 
 assign_client_header
 

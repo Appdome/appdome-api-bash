@@ -84,7 +84,7 @@ reset_validation_errors() {
 
 # Long option names (without leading dashes) for typo suggestions
 APPDOME_API_KNOWN_OPTIONS=(
-  api_key team_id fusion_set_id direct_upload app
+  api_key team_id fusion_set_id direct_upload app skip_upload_checksum_call
   sign_on_appdome private_signing auto_dev_private_signing
   keystore provisioning_profiles entitlements output
   certificate_output certificate_json workflow_output_logs
@@ -150,6 +150,34 @@ assign_client_header() {
     APPDOME_CLIENT_HEADER='Appdome-cli-bash/1.0'
   else
     APPDOME_CLIENT_HEADER=$(printenv APPDOME_CLIENT_HEADER)
+  fi
+}
+
+init_server_url() {
+  SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
+  SERVER_URL="${SERVER_URL%/}"
+}
+
+init_api_key_from_env() {
+  if [[ -z "$API_KEY" ]]; then
+    API_KEY="${APPDOME_API_KEY:-${API_KEY_ENV:-}}"
+  fi
+}
+
+init_fusion_set_id_from_env() {
+  if [[ -n "$FUSION_SET_ID" ]]; then
+    return
+  fi
+  if [[ "$PLATFORM" == "IOS" ]]; then
+    FUSION_SET_ID="${APPDOME_IOS_FS_ID:-}"
+  elif [[ "$PLATFORM" == "ANDROID" ]]; then
+    FUSION_SET_ID="${APPDOME_ANDROID_FS_ID:-}"
+  fi
+}
+
+init_team_id_from_env() {
+  if [[ -z "$TEAM_ID" ]]; then
+    TEAM_ID="${APPDOME_TEAM_ID:-personal}"
   fi
 }
 

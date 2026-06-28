@@ -11,8 +11,11 @@ validate_inputs() {
     PLATFORM=IOS
   fi
 
+  init_api_key_from_env
+  init_team_id_from_env
+  init_fusion_set_id_from_env
   require_param "--api_key (-key) is required (or set APPDOME_API_KEY environment variable)" "$API_KEY"
-  require_param "--fusion_set_id (-fs) is required" "$FUSION_SET_ID"
+  require_param "--fusion_set_id (-fs) is required (or set APPDOME_IOS_FS_ID / APPDOME_ANDROID_FS_ID environment variable)" "$FUSION_SET_ID"
   require_param "--output (-o) is required — output path for the fused SDK" "$FINAL_OUTPUT_LOCATION"
   flush_validation_errors
 
@@ -38,6 +41,7 @@ help() {
   echo "-key  |  --api_key                          Appdome API key (required)"
   echo "-fs   |  --fusion_set_id                    Fusion-set-id to use (required)"
   echo "-du   |  --direct_upload                    Upload app directly to Appdome, and not through aws pre-signed url (optional)"
+  echo "       |  --skip_upload_checksum_call        Skip check-by-checksum API call before upload (optional)"
   echo "-t    |  --team_id                          Appdome team id (optional)"
   echo "-a    |  --app                              .aar/.zip file (SDK) location (required)"
   echo "-o    |  --output                           Output file for fused and signed SDK after Appdome (required)"
@@ -71,6 +75,10 @@ parse_args() {
       ;;
     -du | --direct_upload)
       DIRECT_UPLOAD=true
+      shift 1
+      ;;
+    --skip_upload_checksum_call)
+      SKIP_UPLOAD_CHECKSUM_CALL=true
       shift 1
       ;;
     -a | --app)
@@ -140,6 +148,6 @@ parse_args() {
     report_unknown_arguments "${UNKNOWN_ARGS[@]}"
   fi
   init_logging
-  log_debug "Parsed arguments: app=$APP_LOCATION fusion_set_id=$FUSION_SET_ID output=$FINAL_OUTPUT_LOCATION"
   validate_inputs
+  log_debug "Parsed arguments: app=$APP_LOCATION fusion_set_id=$FUSION_SET_ID output=$FINAL_OUTPUT_LOCATION"
 }

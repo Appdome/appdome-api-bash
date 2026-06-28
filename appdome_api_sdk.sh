@@ -11,9 +11,9 @@ source ./appdome_api_bash/download.sh
 source ./appdome_api_bash/status.sh
 
 
-SERVER_URL="${APPDOME_SERVER_BASE_URL:-https://fusion.appdome.com}"
-API_KEY="${API_KEY_ENV:-}"
-TEAM_ID='personal'
+init_server_url
+API_KEY="${APPDOME_API_KEY:-${API_KEY_ENV:-}}"
+TEAM_ID=''
 FUSION_SET_ID=''
 APP_LOCATION=''
 FINAL_OUTPUT_LOCATION=''
