@@ -38,7 +38,7 @@ When required arguments are missing, the script reports each one with the flag n
 --keystore_alias <key alias> \
 --key_pass <key password> \
 --output <output apk/aab> \
---build_to_test_vendor <bitbar,saucelabs,browserstack,lambdatest,perfecto,firebase,aws_device_farm,app_debug,app_profiler> \
+--build_to_test_vendor <bitbar,saucelabs,browserstack,lambdatest,perfecto,firebase,katalon,kobiton,tricentis_device_cloud,aws_device_farm,app_debug,app_profiler> \
 --certificate_output <output certificate pdf> \
 --deobfuscation_script_output <file path for downloading deobfuscation zip file> \
 --build_overrides <json_file_path> \
