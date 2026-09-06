@@ -33,12 +33,16 @@ validate_inputs() {
 
   if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
     case $BUILD_TO_TEST in
-      AUTOMATION_BITBAR|AUTOMATION_BROWSERSTACK|AUTOMATION_LAMBDATEST|AUTOMATION_SAUCELABS|AUTOMATION_PERFECTO|AUTOMATION_FIREBASE|AUTOMATION_KATALON|AUTOMATION_KOBITON|AUTOMATION_TOSCA|AUTOMATION_AWS_DEVICE_FARM)
+      AUTOMATION_BITBAR|AUTOMATION_BROWSERSTACK|AUTOMATION_LAMBDATEST|AUTOMATION_SAUCELABS|AUTOMATION_PERFECTO|AUTOMATION_FIREBASE|AUTOMATION_KATALON|AUTOMATION_KOBITON|AUTOMATION_TRICENTIS_DEVICE_CLOUD|AUTOMATION_AWS_DEVICE_FARM|AUTOMATION_APP_DEBUG|AUTOMATION_APP_PROFILER)
         ;;
       *)
         log_and_exit "Vendor name provided for Build To Test isn't one of the acceptable vendors: $BUILD_TO_TEST"
         ;;
     esac
+
+    if [[ "$PLATFORM" == "IOS" ]] && [[ "$BUILD_TO_TEST" == "AUTOMATION_APP_DEBUG" || "$BUILD_TO_TEST" == "AUTOMATION_APP_PROFILER" ]]; then
+      log_and_exit "$BUILD_TO_TEST is only supported for Android applications"
+    fi
   fi
 
   if [[ $PLATFORM == UNKNOWN ]]; then
@@ -262,6 +266,11 @@ parse_args() {
       ;;
     -btv | --build_to_test_vendor)
       BUILD_TO_TEST="AUTOMATION_$(echo "$2" | tr '[:lower:]' '[:upper:]')"  # Convert to uppercase and add as prefix
+      # Backward compatibility: "tosca" was the historical name for Tricentis Device Cloud.
+      # The API only accepts AUTOMATION_TRICENTIS_DEVICE_CLOUD, so normalize it here.
+      if [[ "$BUILD_TO_TEST" == "AUTOMATION_TOSCA" ]]; then
+        BUILD_TO_TEST="AUTOMATION_TRICENTIS_DEVICE_CLOUD"
+      fi
       shift 2
       ;;
     -cv | --context_overrides)
