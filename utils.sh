@@ -84,7 +84,7 @@ reset_validation_errors() {
 
 # Long option names (without leading dashes) for typo suggestions
 APPDOME_API_KNOWN_OPTIONS=(
-  api_key team_id fusion_set_id direct_upload app skip_upload_checksum_call
+  api_key team_id fusion_set_id direct_upload app pwa skip_upload_checksum_call
   sign_on_appdome private_signing auto_dev_private_signing
   keystore provisioning_profiles entitlements output
   certificate_output certificate_json workflow_output_logs

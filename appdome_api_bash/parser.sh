@@ -6,7 +6,16 @@ SIGN_ACTION='sign'
 validate_inputs() {
   reset_validation_errors
 
-  require_param "--app (-a) is required — path to .ipa, .apk, or .aab file" "$APP_LOCATION"
+  if [[ -n "$PWA_CONFIG_FILE" ]]; then
+    if [[ -n "$APP_LOCATION" ]]; then
+      log_and_exit "--app (-a) and --pwa cannot be used together"
+    fi
+    validate_pwa_unsupported_options
+    # Sets PLATFORM from pwa_platform and merges --build_overrides / --build_logs into the PWA request overrides
+    init_pwa_config "$PWA_CONFIG_FILE"
+  else
+    require_param "--app (-a) or --pwa is required — path to .ipa, .apk, or .aab file, or PWA config json file" "$APP_LOCATION"
+  fi
 
   if [[ "$APP_LOCATION" == *".ipa" ]]; then
     PLATFORM=IOS
@@ -16,9 +25,13 @@ validate_inputs() {
 
   init_api_key_from_env
   init_team_id_from_env
-  init_fusion_set_id_from_env
   require_param "--api_key (-key) is required (or set APPDOME_API_KEY environment variable)" "$API_KEY"
-  require_param "--fusion_set_id (-fs) is required (or set APPDOME_IOS_FS_ID / APPDOME_ANDROID_FS_ID environment variable)" "$FUSION_SET_ID"
+  # PWA: the Fusion Set is only needed when the account has no Short Flow, and the environment variable is
+  # resolved after the upload (see pwa_upload_and_build)
+  if [[ -z "$PWA_CONFIG_FILE" ]]; then
+    init_fusion_set_id_from_env
+    require_param "--fusion_set_id (-fs) is required (or set APPDOME_IOS_FS_ID / APPDOME_ANDROID_FS_ID environment variable)" "$FUSION_SET_ID"
+  fi
   require_param "One signing method is required: --sign_on_appdome (-s), --private_signing (-ps), or --auto_dev_private_signing (-adps)" "$SIGN_METHOD"
   require_param "--output (-o) is required — output path for the fused and signed app" "$FINAL_OUTPUT_LOCATION"
   flush_validation_errors
@@ -116,6 +129,10 @@ validate_inputs() {
     fi
     ;;
   esac
+  if [[ -n "$PWA_CONFIG_FILE" ]]; then
+    # iOS: the provisioning profiles are also sent with the PWA upload
+    add_pwa_provisioning_profiles
+  fi
   if [[ -n "$WORKFLOW_OUTPUT_LOGS" ]]; then
     if [[ -d "$WORKFLOW_OUTPUT_LOGS" ]]; then
       WORKFLOW_OUTPUT_LOGS="$WORKFLOW_OUTPUT_LOGS/workflow.log"
@@ -127,11 +144,15 @@ help() {
   # Display Help
   echo
   echo "-key  |  --api_key                          Appdome API key (required)"
-  echo "-fs   |  --fusion_set_id                    Fusion-set-id to use (required)"
+  echo "-fs   |  --fusion_set_id                    Fusion-set-id to use (required; with --pwa only for accounts without Short Flow)"
   echo "-du   |  --direct_upload                    Upload app directly to Appdome, and not through aws pre-signed url (optional)"
   echo "       |  --skip_upload_checksum_call        Skip check-by-checksum API call before upload (optional)"
   echo "-t    |  --team_id                          Appdome team id (optional)"
-  echo "-a    |  --app                              Application location (required)"
+  echo "-a    |  --app                              Application location (required, or use --pwa)"
+  echo "-pwa  |  --pwa                              Build a Secure PWA instead of uploading an app. Path to json file with PWA parameters"
+  echo "                                            (pwa_address, pwa_platform: aab or ipa, pwa_app_name, overrides). Replaces the upload step."
+  echo "                                            With Short Flow the upload also builds with the default Playground Fusion Set;"
+  echo "                                            otherwise the Fusion Set is used to build. Cannot be used with --app"
   echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
   echo "-so   |  --second_output                    Second_output_app_file (optional)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
@@ -197,6 +218,10 @@ parse_args() {
     -a | --app)
       APP_LOCATION="$2"
       APP_FILE_NAME="$(basename -- "$APP_LOCATION")"
+      shift 2
+      ;;
+    -pwa | --pwa)
+      PWA_CONFIG_FILE="$2"
       shift 2
       ;;
     -s | --sign_on_appdome)
@@ -355,5 +380,5 @@ parse_args() {
   fi
   init_logging
   validate_inputs
-  log_debug "Parsed arguments: app=$APP_LOCATION fusion_set_id=$FUSION_SET_ID sign_method=$SIGN_METHOD output=$FINAL_OUTPUT_LOCATION"
+  log_debug "Parsed arguments: app=$APP_LOCATION pwa=$PWA_CONFIG_FILE fusion_set_id=$FUSION_SET_ID sign_method=$SIGN_METHOD output=$FINAL_OUTPUT_LOCATION"
 }

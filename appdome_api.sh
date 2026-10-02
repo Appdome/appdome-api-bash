@@ -4,6 +4,7 @@ source ./utils.sh
 source ./appdome_api_bash/parser.sh
 source ./appdome_api_bash/upload.sh
 source ./appdome_api_bash/direct_upload.sh
+source ./appdome_api_bash/pwa_upload.sh
 source ./appdome_api_bash/build.sh
 source ./appdome_api_bash/context.sh
 source ./appdome_api_bash/private_sign.sh
@@ -19,6 +20,7 @@ API_KEY="${APPDOME_API_KEY:-${API_KEY_ENV:-}}"
 TEAM_ID=''
 FUSION_SET_ID=''
 APP_LOCATION=''
+PWA_CONFIG_FILE=''
 FINAL_OUTPUT_LOCATION=''
 APP_FILE_NAME="$(basename -- "$APP_LOCATION")"
 SIGN_METHOD=''
@@ -35,13 +37,17 @@ main() {
   start_all_process_time=$(date +%s)
   log_info "Starting Appdome flow"
  
-  if [[ "$DIRECT_UPLOAD" == "true" ]]; then
-    log_info "Uploading app directly to Appdome"
-    direct_upload
+  if [[ -n "$PWA_CONFIG_FILE" ]]; then
+    pwa_upload_and_build
   else
-    upload
+    if [[ "$DIRECT_UPLOAD" == "true" ]]; then
+      log_info "Uploading app directly to Appdome"
+      direct_upload
+    else
+      upload
+    fi
+    build
   fi
-  build
   case "$SIGN_METHOD" in
   "$PRIVATE_SIGN_ACTION")
     if [[ $PLATFORM == IOS ]]; then

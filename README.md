@@ -86,6 +86,53 @@ When required arguments are missing, the script reports each one with the flag n
 --cert_pinning_zip <zip file containing dynamic certificates>
 ```
 
+#### PWA Example:
+
+Creates and protects a Secure PWA from a website address. Pass `--pwa` with a PWA config file instead of `--app`.
+`pwa_platform` in the config file is `aab` or `ipa`; use the matching Android or iOS signing parameters.
+- Accounts with the Short Flow license: the PWA upload also builds the app with the default Playground Fusion Set
+  (named after the app). `--fusion_set_id` is ignored.
+- Other accounts: the upload only creates the app, and it is then built with `--fusion_set_id`
+  (or `APPDOME_ANDROID_FS_ID` / `APPDOME_IOS_FS_ID`).
+- iOS (`ipa`): `--provisioning_profiles` is required. The profiles are also sent with the PWA upload.
+
+Signing and download then run as in the Android/iOS flow. `--build_logs` and `--build_overrides` are merged into the
+config file's `overrides` and also used for the build. Options that only apply to uploading an app file
+(`--direct_upload`, `--skip_upload_checksum_call`, `--build_to_test_vendor`, `--baseline_profile`, `--startup_profile`,
+`--input_mapping`, `--cert_pinning_zip`) cannot be combined with `--pwa`.
+
+```bash
+./appdome_api.sh \
+--api_key <api key> \
+--team_id <team-id> \
+--pwa <pwa config json file> \
+--fusion_set_id <fusion-set-id (accounts without Short Flow)> \
+--sign_on_appdome \
+--keystore <keystore file> \
+--keystore_pass <keystore password> \
+--keystore_alias <key alias> \
+--key_pass <key password> \
+--output <output aab> \
+--certificate_output <output certificate pdf> \
+--sign_overrides <json_file_path>
+```
+
+PWA config file ([Build a PWA](https://apis.appdome.com/reference/post_pwappload)):
+
+```json
+{
+  "pwa_address": "https://example.com",
+  "pwa_platform": "aab",
+  "pwa_app_name": "My App",
+  "overrides": {}
+}
+```
+
+- `pwa_address` and `pwa_platform` are required. Unknown keys are rejected.
+- `pwa_platform` is the output package type, one platform per build: `aab` for Android or `ipa` for iOS.
+- `overrides` is optional and sent to the API as a JSON object (e.g. `{"extended_logs": true}` for Diagnostic Logs).
+  For iOS the provisioning profiles are added as `overrides.provisioning_profile` (base64 encoded).
+
 #### iOS SDK Example:
 
 ```bash
