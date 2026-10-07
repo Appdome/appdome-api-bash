@@ -20,7 +20,6 @@ validate_inputs() {
   require_param "--api_key (-key) is required (or set APPDOME_API_KEY environment variable)" "$API_KEY"
   require_param "--fusion_set_id (-fs) is required (or set APPDOME_IOS_FS_ID / APPDOME_ANDROID_FS_ID environment variable)" "$FUSION_SET_ID"
   require_param "One signing method is required: --sign_on_appdome (-s), --private_signing (-ps), or --auto_dev_private_signing (-adps)" "$SIGN_METHOD"
-  require_param "--output (-o) is required — output path for the fused and signed app" "$FINAL_OUTPUT_LOCATION"
   flush_validation_errors
 
   if [[ "$PLATFORM" == "UNKNOWN" ]]; then
@@ -29,6 +28,10 @@ validate_inputs() {
 
   if [[ -n "$TRUSTED_SIGNING_FINGERPRINTS_FILE" ]] && [[ "$PLATFORM" == "IOS" ]]; then
     log_and_exit "--signing_fingerprint_list is only valid for Android applications"
+  fi
+
+  if [[ "$APPDOME_TEST" == "true" && -n "$BUILD_TO_TEST" ]]; then
+    log_and_exit "Apps built via the Build-to-Test flow are not eligible — only regular fuse/build (then sign) apps can run Appdome Test."
   fi
 
   if [[ -n $BUILD_TO_TEST ]] && [[ -n ${BUILD_TO_TEST+x} ]]; then
@@ -132,7 +135,7 @@ help() {
   echo "       |  --skip_upload_checksum_call        Skip check-by-checksum API call before upload (optional)"
   echo "-t    |  --team_id                          Appdome team id (optional)"
   echo "-a    |  --app                              Application location (required)"
-  echo "-o    |  --output                           Output file for fused and signed app after Appdome (required)"
+  echo "-o    |  --output                           Output file for fused and signed app after Appdome (optional)"
   echo "-so   |  --second_output                    Second_output_app_file (optional)"
   echo "-co   |  --certificate_output               Output file for Certified Secure pdf (optional)"
   echo "-cj   |  --certificate_json                 Output file for Certified Secure json (optional)"
@@ -148,6 +151,7 @@ help() {
   echo "-cv   |  --context_overrides                Path to json file with context overrides (optional)"
   echo "-sv   |  --sign_overrides                   Path to json file with sign overrides (optional)"
   echo "-btv  |  --build_to_test_vendor             Enter vendor name on which Build to Test will happen (optional)"
+  echo "      |  --appdome_test [wait | atr appdome_test_results_json]   Run Appdome Test (Standard Launch Tests) on the signed build. No extra args: start and print the Appdome Test task ID. wait: poll until complete. atr appdome_test_results_json: download Appdome Test Results JSON (implies wait)."
   echo "-wol  |  --workflow_output_logs             Enter path to a workflow output logs file (optional)"
   echo "-v    |  --verbose                          Show debug logs (request URLs, validation details)"
   echo
@@ -272,6 +276,26 @@ parse_args() {
         BUILD_TO_TEST="AUTOMATION_TRICENTIS_DEVICE_CLOUD"
       fi
       shift 2
+      ;;
+    --appdome_test)
+      APPDOME_TEST=true
+      shift 1
+      if [[ $# -gt 0 && "$1" != -* ]]; then
+        if [[ "$1" == "wait" ]]; then
+          WAIT=true
+          shift 1
+        elif [[ "$1" == "atr" ]]; then
+          shift 1
+          if [[ $# -eq 0 || "$1" == -* ]]; then
+            log_and_exit "--appdome_test atr requires <appdome_test_results_json>"
+          fi
+          APPDOME_TEST_RESULTS="$1"
+          WAIT=true
+          shift 1
+        else
+          log_and_exit "--appdome_test accepts no extra args, wait, or atr <appdome_test_results_json>"
+        fi
+      fi
       ;;
     -cv | --context_overrides)
       CONTEXT_OVERRIDES=$(cat "$2")

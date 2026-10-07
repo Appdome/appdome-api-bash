@@ -13,6 +13,7 @@ source ./appdome_api_bash/download.sh
 source ./appdome_api_bash/status.sh
 source ./appdome_api_bash/crashlytics.sh
 source ./appdome_api_bash/datadog.sh
+source ./appdome_api_bash/appdome_test.sh
 
 init_server_url
 API_KEY="${APPDOME_API_KEY:-${API_KEY_ENV:-}}"
@@ -26,6 +27,9 @@ PLATFORM=UNKNOWN
 BUILD_OVERRIDES="{}"
 CONTEXT_OVERRIDES="{}"
 SIGN_OVERRIDES="{}"
+APPDOME_TEST=false
+WAIT=false
+APPDOME_TEST_RESULTS=''
 
 
 assign_client_header
@@ -66,7 +70,9 @@ main() {
     ;;
   esac
 
-  download_fused_app
+  if [[ -n "$FINAL_OUTPUT_LOCATION" ]]; then
+    download_fused_app
+  fi
   if [[ -n "$CERTIFICATE_OUTPUT_LOCATION" ]]; then
     download_certified_secure
   fi
@@ -93,7 +99,24 @@ main() {
     download_second_output
   fi
 
+  if [[ "$APPDOME_TEST" == "true" ]]; then
+    _appdome_test
+  fi
+
   printTime $((($(date +%s) - start_all_process_time))) "Appdome API took: "
+}
+
+_appdome_test() {
+  PARENT_TASK_ID="$TASK_ID"
+  start_appdome_test
+  if [[ "$WAIT" == "true" || -n "$APPDOME_TEST_RESULTS" ]]; then
+    statusWaiter "Appdome Test"
+  fi
+  if [[ -n "$APPDOME_TEST_RESULTS" ]]; then
+    download "Download Appdome Test results" \
+      "--url '$SERVER_URL/api/v1/tasks/$TASK_ID/appdome-test-result?team_id=$TEAM_ID'" \
+      "$APPDOME_TEST_RESULTS"
+  fi
 }
 
 main "$@"

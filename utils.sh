@@ -94,6 +94,7 @@ APPDOME_API_KNOWN_OPTIONS=(
   signing_fingerprint_upgrade signing_fingerprint_list google_play_signing
   keystore_pass baseline_profile startup_profile input_mapping
   cert_pinning_zip keystore_alias key_pass verbose help
+  appdome_test
 )
 
 _normalize_option_name() {

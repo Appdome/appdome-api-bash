@@ -1,11 +1,15 @@
 #!/bin/bash
 source ./utils.sh
 
+WAIT_TIMEOUT_SEC=3600
+
 statusWaiter() {
   log_info "Waiting for task to complete: $1"
   STATUS="progress"
   local lastDate="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"  # Ensure URL-safe date formatting
   local operation="$1"
+  local timeout_sec="$WAIT_TIMEOUT_SEC"
+  local accumulated_sleep=0
   local file_path=$WORKFLOW_OUTPUT_LOGS
   local isMessages=false
 
@@ -15,7 +19,7 @@ statusWaiter() {
     isMessages=true
   fi
 
-  while [ "$STATUS" = "progress" ]; do
+  while [ "$STATUS" = "progress" ] && [ "$accumulated_sleep" -le "$timeout_sec" ]; do
  
     local base_url="$SERVER_URL/api/v1/tasks/$TASK_ID/status?team_id=$TEAM_ID"
     if [[ "$isMessages" == true ]]; then
@@ -77,7 +81,12 @@ statusWaiter() {
       printf '.'
     fi
     sleep 1
+    accumulated_sleep=$((accumulated_sleep + 1))
   done
+
+  if [[ "$STATUS" = "progress" ]]; then
+    log_and_exit "Task did not complete in the specified timeout of: $timeout_sec seconds"
+  fi
 
   if [[ "$STATUS" != "completed" ]]; then
     local reason=$(extract_string_value_from_json "$HTTP_BODY" 'message')
